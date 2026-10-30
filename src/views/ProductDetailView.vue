@@ -227,10 +227,10 @@ import { Navigation } from "swiper/modules";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import "photoswipe/style.css";
 
-import TheHeader from "@/components/TheHeader.vue";
-import TheFooter from "@/components/TheFooter.vue";
+import TheHeader from "@/components/front/TheHeader.vue";
+import TheFooter from "@/components/front/TheFooter.vue";
 import TheBreadcrumb from "@/components/ui/TheBreadcrumb.vue";
-import ProductCard from "@/components/ProductCard.vue";
+import ProductCard from "@/components/front/ProductCard.vue";
 
 import "swiper/css";
 import "swiper/css/navigation";

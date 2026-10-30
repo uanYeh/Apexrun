@@ -1,5 +1,5 @@
 <template>
-  <footer class="bg-primary text-white">
+  <footer class="bg-primary">
     <div class="container pt-5 pt-lg-7 pb-3 pb-lg-5">
       <div class="d-flex justify-center justify-content-between align-items-center mb-4">
         <a class="navbar-brand" href="#"
@@ -37,16 +37,22 @@
         </ul>
       </div>
       <div class="d-flex justify-center justify-content-between align-items-center">
-        <ul class="list-unstyled">
+        <ul class="list-unstyled text-white">
           <li>Email : support@apexrun.com.tw</li>
           <li>Customer Service : 9:00 AM - 5:00 PM | Monday to Friday</li>
           <li>No. 123, Xingbei Rd., Wenshan District, Taipei City, Taiwan</li>
         </ul>
       </div>
     </div>
-    <div class="text-center border-top border-light">
+    <div class="text-center border-top border-light text-white">
       <p class="mb-0 px-1 py-4 py-lg-2">
-        © 2026 Apexrun | Personal Portfolio | Non-Commercial Use | Images: Unsplash、magnific
+        © 2026 Apexrun | Personal Portfolio | Non-Commercial Use | Images:
+        <a href="https://unsplash.com/" target="_blank" class="text-decoration-none link-light"
+          >Unsplash</a
+        >、
+        <a href="https://photoswipe.com/" target="_blank" class="text-decoration-none link-light"
+          >PhotoSwipe</a
+        >
       </p>
     </div>
   </footer>

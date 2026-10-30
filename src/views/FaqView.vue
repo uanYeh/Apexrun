@@ -57,8 +57,8 @@
 <script>
 import qaBanner from "@/assets/images/qaBanner.jpg";
 
-import TheHeader from "@/components/TheHeader.vue";
-import TheFooter from "@/components/TheFooter.vue";
+import TheHeader from "@/components/front/TheHeader.vue";
+import TheFooter from "@/components/front/TheFooter.vue";
 import TheBreadcrumb from "@/components/ui/TheBreadcrumb.vue";
 
 export default {

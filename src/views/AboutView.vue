@@ -55,8 +55,8 @@ import sportPeoplePhoto from "@/assets/images/full-shot-woman-doing-sport.png";
 import aboutBanner from "@/assets/images/aboutBanner.jpg";
 import signImg from "@/assets/images/sign.jpg";
 
-import TheHeader from "@/components/TheHeader.vue";
-import TheFooter from "@/components/TheFooter.vue";
+import TheHeader from "@/components/front/TheHeader.vue";
+import TheFooter from "@/components/front/TheFooter.vue";
 import TheBreadcrumb from "@/components/ui/TheBreadcrumb.vue";
 
 export default {

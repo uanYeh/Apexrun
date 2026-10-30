@@ -111,7 +111,7 @@
 <script>
 import Headroom from "headroom.js";
 import TheCountdown from "@/components/ui/TheCountdown.vue";
-import CartOffcanvas from "@/components/CartOffcanvas.vue";
+import CartOffcanvas from "@/components/front/CartOffcanvas.vue";
 
 export default {
   components: { CartOffcanvas, TheCountdown },
