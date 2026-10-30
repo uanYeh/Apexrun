@@ -1,5 +1,4 @@
 import { createRouter, createWebHashHistory } from "vue-router";
-import HomeView from "../views/front/HomeView.vue";
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -7,67 +6,57 @@ const router = createRouter({
     {
       path: "/",
       name: "home",
-      component: HomeView,
+      component: () => import("@/views/HomeView.vue"),
     },
     {
       path: "/about",
       name: "about",
-      component: () => import("../views/front/AboutView.vue"),
+      component: () => import("@/views/AboutView.vue"),
     },
     {
       path: "/products",
       name: "products",
-      component: () => import("../views/front/ProductView.vue"),
+      component: () => import("@/views/ProductView.vue"),
     },
     {
       path: "/products/:id",
       name: "product",
-      component: () => import("@/views/front/ProductDetailView.vue"),
+      component: () => import("@/views/ProductDetailView.vue"),
     },
     {
       path: "/news",
       name: "news",
-      component: () => import("@/views/front/NewsView.vue"),
-    },
-    {
-      path: "/about",
-      name: "about",
-      component: () => import("@/views/front/AboutView.vue"),
+      component: () => import("@/views/NewsView.vue"),
     },
     {
       path: "/faq",
       name: "faq",
-      component: () => import("@/views/front/FaqView.vue"),
+      component: () => import("@/views/FaqView.vue"),
     },
     {
       path: "/delivery",
       name: "delivery",
-      component: () => import("@/views/front/DeliveryView.vue"),
+      component: () => import("@/views/DeliveryView.vue"),
     },
     {
       path: "/return",
       name: "return",
-      component: () => import("@/views/front/ReturnView.vue"),
+      component: () => import("@/views/ReturnView.vue"),
     },
     {
       path: "/cart",
       name: "cart",
-      component: () => import("@/views/front/CartView.vue"),
+      component: () => import("@/views/CartView.vue"),
     },
     {
       path: "/checkout",
       name: "checkout",
-      component: () => import("@/views/front/CheckoutView.vue"),
+      component: () => import("@/views/CheckoutView.vue"),
     },
     {
       path: "/order",
       name: "order",
-      component: () => import("@/views/front/OrderView.vue"),
-    },
-    {
-      path: "/test",
-      name: "test",
-      component: () => import("@/views/front/TestView.vue"),
+      component: () => import("@/views/OrderView.vue"),
     },
   ],
 });

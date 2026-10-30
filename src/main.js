@@ -6,6 +6,8 @@ import VueAxios from "vue-axios";
 import App from "./App.vue";
 import router from "./router";
 import AOS from "aos";
+import Loading from "vue3-loading-overlay";
+import "vue3-loading-overlay/dist/vue3-loading-overlay.css";
 
 import "../stylesheets/all.scss";
 
@@ -34,5 +36,5 @@ AOS.init({
   duration: 800,
   once: true,
 });
-
+app.component("Loading", Loading);
 app.mount("#app");

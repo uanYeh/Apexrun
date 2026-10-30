@@ -271,7 +271,7 @@
       </div>
     </div>
   </section>
-  <footer class="bg-primary text-white">
+  <!-- <footer class="bg-primary text-white">
     <div class="container pt-5 pt-lg-7 pb-3 pb-lg-5">
       <div class="d-flex justify-center justify-content-between align-items-center mb-4">
         <a class="navbar-brand" href="#"
@@ -313,7 +313,7 @@
         © 2026 Apexrun | Personal Portfolio | Non-Commercial Use | Images: Unsplash、magnific
       </p>
     </div>
-  </footer>
+  </footer> -->
   <!-- 購物車側邊欄 -->
   <div
     class="offcanvas offcanvas-end"
@@ -347,6 +347,8 @@
       </div>
     </div>
   </div>
+
+  <TheFooter />
 </template>
 
 <script>
@@ -366,6 +368,7 @@ import { Swiper, SwiperSlide } from "swiper/vue";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 
 import TheHeader from "@/components/TheHeader.vue";
+import TheFooter from "@/components/TheFooter.vue";
 import ProductCard from "@/components/ProductCard.vue";
 import TheCouponModal from "@/components/ui/TheCouponModal.vue";
 
@@ -377,6 +380,7 @@ import "swiper/css/autoplay";
 export default {
   components: {
     TheHeader,
+    TheFooter,
     ProductCard,
     TheCouponModal,
     Swiper,

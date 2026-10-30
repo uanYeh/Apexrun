@@ -34,6 +34,14 @@
               </a>
               <ul class="dropdown-menu rounded-0 mb-3 mb-lg-0">
                 <li><RouterLink class="dropdown-item" to="/products">All Products</RouterLink></li>
+                <li v-for="cat in categories" :key="cat">
+                  <RouterLink class="dropdown-item" :to="`/products?category=${cat}`">
+                    {{ cat }}
+                  </RouterLink>
+                </li>
+              </ul>
+              <!-- <ul class="dropdown-menu rounded-0 mb-3 mb-lg-0">
+                <li><RouterLink class="dropdown-item" to="/products">All Products</RouterLink></li>
                 <li>
                   <RouterLink class="dropdown-item" to="/products?category=shoes">Shoes</RouterLink>
                 </li>
@@ -47,7 +55,7 @@
                     >Accessories</RouterLink
                   >
                 </li>
-              </ul>
+              </ul> -->
             </li>
             <li class="nav-item">
               <RouterLink
@@ -107,6 +115,11 @@ import CartOffcanvas from "@/components/CartOffcanvas.vue";
 
 export default {
   components: { CartOffcanvas, TheCountdown },
+  data() {
+    return {
+      categories: [],
+    };
+  },
   mounted() {
     const header = document.querySelector("header");
     const headroom = new Headroom(header, {
@@ -136,6 +149,15 @@ export default {
         btn.classList.remove("show");
       }
     },
+    getCategories() {
+      const api = `${import.meta.env.VITE_APP_API}api/${import.meta.env.VITE_APP_PATH}/products/all`;
+      this.$http.get(api).then((res) => {
+        this.categories = [...new Set(res.data.products.map((p) => p.category))];
+      });
+    },
+  },
+  created() {
+    this.getCategories();
   },
 };
 </script>

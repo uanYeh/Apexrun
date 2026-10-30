@@ -28,7 +28,9 @@
             >
           </li>
           <li>
-            <a class="link-hover link-light text-decoration-none p-2 fw-semibold fs-6" href=""
+            <a
+              class="link-hover link-light text-decoration-none p-2 fw-semibold fs-6"
+              href="mailto:support@apexrun.com.tw"
               >Contact Us</a
             >
           </li>
