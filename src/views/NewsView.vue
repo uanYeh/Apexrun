@@ -1,4 +1,5 @@
 <template>
+  <Loading :active="isLoading"></Loading>
   <TheHeader />
   <div class="container-xl py-3">
     <TheBreadcrumb />
@@ -7,17 +8,17 @@
       <div class="row mx-0 gx-0 g-2 g-lg-4 mb-lg-6 align-items-stretch">
         <div
           class="col-12 col-md-6 col-lg-4 align-items-stretch"
-          v-for="item in newsList"
+          v-for="item in pagedArticles"
           :key="item.id"
         >
           <div class="news-card card border-0 rounded-0 position-relative h-100">
-            <img :src="item.imageUrl" class="rounded-0 img-fluid mb-0" :alt="item.title" />
+            <img :src="item.image" class="rounded-0 img-fluid mb-0" :alt="item.title" />
             <div class="card-body px-1 p-md-2 p-lg-3 pt-2 d-flex flex-column">
               <p class="text-muted fs-7 mb-1">
-                <i class="bi bi-calendar-week me-1"></i>{{ item.date }}
+                <i class="bi bi-calendar-week me-1"></i>{{ date(item.create_at) }}
               </p>
-              <h5 class="fw-semibold">{{ item.title }}</h5>
-              <p class="card-text fs-6 fw-medium content-truncate mb-4">{{ item.text }}</p>
+              <h5 class="clamp2 fw-semibold">{{ item.title }}</h5>
+              <p class="card-text fs-6 fw-medium content-truncate mb-4">{{ item.description }}</p>
               <RouterLink
                 :to="`/news/${item.id}`"
                 class="stretched-link d-block text-end fs-6 fw-semibold link-dark mt-auto"
@@ -27,7 +28,7 @@
           </div>
         </div>
       </div>
-      <ThePagination />
+      <ThePagination :currentPage="currentPage" :totalPages="totalPages" @change="changePage" />
       <!-- <div class="row">
         <div class="col-12 col-md-2 col-lg-4">
           <div class="news-card card border-0 rounded-0">
@@ -60,6 +61,7 @@ import TheHeader from "@/components/TheHeader.vue";
 import TheFooter from "@/components/TheFooter.vue";
 import TheBreadcrumb from "@/components/ui/TheBreadcrumb.vue";
 import ThePagination from "@/components/ui/ThePagination.vue";
+import { date } from "@/methods/filters";
 
 export default {
   components: {
@@ -71,51 +73,46 @@ export default {
   data() {
     return {
       newsImg,
-      newsList: [
-        {
-          id: 1,
-          title: "Wavo Launches New Ultra Boost Running Shoes for 2026",
-          text: "Wavo's latest Ultra Boost series redefines performance running with cutting-edge cushioning technology and a sleek new design built for all terrains.",
-          imageUrl: newsImg,
-          date: "2026-09-01",
-        },
-        {
-          id: 2,
-          title: "How to Choose the Right Running Shoes for Your Foot Type",
-          text: "Finding the perfect pair starts with understanding your arch, gait, and terrain. Our experts break down everything you need to know before your next purchase.",
-          imageUrl: newsImg,
-          date: "2026-08-20",
-        },
-        {
-          id: 3,
-          title: "Wavo Partners with Elite Athletes for 2026 Season",
-          text: "We're proud to announce our sponsorship of three world-class marathon runners who will represent Wavo on the global stage this coming season.",
-          imageUrl: newsImg,
-          date: "2026-08-10",
-        },
-        {
-          id: 4,
-          title: "Top 5 Training Tips for Your First Half Marathon",
-          text: "Whether you're a beginner or returning runner, these five training strategies will help you cross the finish line strong and injury-free.",
-          imageUrl: newsImg,
-          date: "2026-07-28",
-        },
-        {
-          id: 5,
-          title: "Sustainable Sports Gear: Wavo's Green Initiative",
-          text: "Wavo is committed to reducing its environmental footprint with eco-friendly materials and a recycling program for worn-out gear.",
-          imageUrl: newsImg,
-          date: "2026-07-15",
-        },
-        {
-          id: 6,
-          title: "Summer Sale: Up to 30% Off Selected Apparel",
-          text: "Don't miss our biggest summer sale of the year. Stock up on breathable, performance-ready apparel at unbeatable prices.",
-          imageUrl: newsImg,
-          date: "2026-07-01",
-        },
-      ],
+      isLoading: false,
+      allArticles: [],
+      perPage: 6, //每頁幾筆
+      currentPage: 1,
     };
+  },
+  methods: {
+    date,
+    getArticles() {
+      const api = `${import.meta.env.VITE_APP_API}api/${import.meta.env.VITE_APP_PATH}/articles`;
+      this.isLoading = true;
+      this.$http.get(api).then((res) => {
+        this.isLoading = false;
+        this.allArticles = res.data.articles;
+        console.log(res.data.articles);
+      });
+    },
+    changePage(page) {
+      this.currentPage = page;
+    },
+  },
+  computed: {
+    totalPages() {
+      return Math.ceil(this.allArticles.length / this.perPage);
+    },
+    pagedArticles() {
+      const start = (this.currentPage - 1) * this.perPage;
+      return this.allArticles.slice(start, start + this.perPage);
+    },
+    frontPagination() {
+      return {
+        total_pages: this.totalPages,
+        current_page: this.currentPage,
+        has_pre: this.currentPage > 1,
+        has_next: this.currentPage < this.totalPages,
+      };
+    },
+  },
+  created() {
+    this.getArticles();
   },
 };
 </script>

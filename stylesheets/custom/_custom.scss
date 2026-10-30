@@ -129,7 +129,8 @@ $area-img-width-xl: percentage(1 / 5); // = 25%
 .card-text {
   color: $secdary-color;
 }
-.card-text {
+.card-text,
+.clamp2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;

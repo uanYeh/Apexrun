@@ -108,7 +108,7 @@ export default {
       products: [],
       isLoading: false,
       sortBy: "",
-      perPage: 6, //一頁幾筆
+      perPage: 2, //一頁幾筆
       currentPage: 1,
       categoryDesc: [
         //無api 只好寫死分類跟說明
