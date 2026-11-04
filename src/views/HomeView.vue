@@ -35,8 +35,8 @@
     <div data-aos="fade-up" data-aos-delay="200">
       <h2 class="text-center mb-4 mb-lg-5 fw-bold">Clearing</h2>
       <Swiper v-bind="swiperOptions">
-        <SwiperSlide v-for="item in products" :key="item.id">
-          <ProductCard :product="item" />
+        <SwiperSlide v-for="item in saleProducts" :key="item.id">
+          <ProductCard :product="item" @add-cart="addCart" />
         </SwiperSlide>
       </Swiper>
     </div>
@@ -176,7 +176,7 @@
         </div>
         <div class="newproduct-content">
           <Swiper v-bind="swiper2Options">
-            <SwiperSlide v-for="item in products" :key="item.id">
+            <SwiperSlide v-for="item in newProducts" :key="item.id">
               <ProductCard :product="item" />
             </SwiperSlide>
           </Swiper>
@@ -188,7 +188,7 @@
     <div data-aos="fade-up" data-aos-delay="200">
       <h2 class="text-center mb-4 mb-lg-5 fw-bold">Most Popular</h2>
       <Swiper v-bind="swiperOptions">
-        <SwiperSlide v-for="item in products" :key="item.id">
+        <SwiperSlide v-for="item in popularProducts" :key="item.id">
           <ProductCard :product="item" />
         </SwiperSlide>
       </Swiper>
@@ -352,30 +352,36 @@
 </template>
 
 <script>
+// ===== 圖片 =====
 import bannerImg from "@/assets/images/banner.jpg";
 import fbannerImg from "@/assets/images/f-banner.jpg";
-import photoImg from "@/assets/images/photoImg.jpg";
-import adImg from "@/assets/images/adImg.jpg";
 import areaImg from "@/assets/images/area.jpg";
-import brandsIcon01 from "@/assets/images/brandsIcon01.svg";
-import brandsIcon02 from "@/assets/images/brandsIcon02.svg";
-import brandsIcon03 from "@/assets/images/brandsIcon03.svg";
-import icon01 from "@/assets/images/icon01.svg";
-import icon02 from "@/assets/images/icon02.svg";
-import icon03 from "@/assets/images/icon03.svg";
 
+// ===== 購物車 =====
+import { useCartStore } from "@/stores/cart";
+import { Offcanvas } from "bootstrap";
+
+// ===== Swiper =====
 import { Swiper, SwiperSlide } from "swiper/vue";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/autoplay";
 
+// ===== 元件 =====
 import TheHeader from "@/components/TheHeader.vue";
 import TheFooter from "@/components/TheFooter.vue";
 import ProductCard from "@/components/ProductCard.vue";
 import TheCouponModal from "@/components/ui/TheCouponModal.vue";
 
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
-import "swiper/css/autoplay";
+// ===== 抽出去的資料與設定 =====
+import reviews from "@/data/reviews";
+import brands from "@/data/brands";
+import {
+  productOptions,
+  newProductOptions,
+  reviewsOptions,
+  featureOptions,
+} from "@/config/swiperOptions";
 
 export default {
   components: {
@@ -386,217 +392,62 @@ export default {
     Swiper,
     SwiperSlide,
   },
+  setup() {
+    const cartStore = useCartStore();
+    return { cartStore };
+  },
   data() {
     return {
       bannerImg,
       fbannerImg,
-      photoImg,
-      adImg,
       areaImg,
-      icon01,
-      icon02,
-      icon03,
-      brands: [brandsIcon01, brandsIcon02, brandsIcon03],
-      products: [
-        {
-          id: 1,
-          title: "Ultra Boost Running Shoes Pro Edition",
-          text: "Engineered for long-distance runners, featuring ultra-lightweight cushioning technology that delivers exceptional rebound and comfort across all surfaces.",
-          price: 3200,
-          origin_price: 4500,
-          category: "Ultra Boost Running",
-          imageUrl: photoImg,
-        },
-        {
-          id: 2,
-          title: "Lightweight Sport Performance Jacket",
-          text: "A breathable, wind-resistant jacket with water-repellent fabric, designed to keep you performing at your best whether on a morning run or intense training session.",
-          price: 2800,
-          origin_price: 3800,
-          category: "Apparel",
-          imageUrl: photoImg,
-        },
-        {
-          id: 3,
-          title: "High Compression Training Tights",
-          text: "High-elasticity compression design promotes blood circulation, reduces muscle fatigue, and enhances both athletic performance and post-workout recovery.",
-          price: 1500,
-          origin_price: 2000,
-          category: "Apparel",
-          imageUrl: photoImg,
-        },
-        {
-          id: 4,
-          title: "All Terrain Trail Running Shoes",
-          text: "Reinforced grip outsole adapts to gravel, mud, and rugged terrain, keeping your stride stable and confident on every trail running adventure.",
-          price: 4200,
-          origin_price: 5500,
-          category: "Shoes",
-          imageUrl: photoImg,
-        },
-        {
-          id: 5,
-          title: "Waterproof Multi-Pocket Sports Bag",
-          text: "Durable waterproof material paired with a versatile multi-pocket layout, making it easy to organize your gear for the gym, trails, or any outdoor activity.",
-          price: 1800,
-          origin_price: 2500,
-          category: "Accessories",
-          imageUrl: photoImg,
-        },
-        {
-          id: 6,
-          title: "Breathable UV Protection Running Cap",
-          text: "Quick-dry, UV-blocking fabric shields you from the sun while keeping you cool and comfortable during outdoor workouts in any weather condition.",
-          price: 850,
-          origin_price: 1200,
-          category: "Accessories",
-          imageUrl: photoImg,
-        },
-        {
-          id: 7,
-          title: "Breathable UV Protection Running Cap",
-          text: "Quick-dry, UV-blocking fabric shields you from the sun while keeping you cool and comfortable during outdoor workouts in any weather condition.",
-          price: 850,
-          origin_price: 1200,
-          category: "Accessories",
-          imageUrl: photoImg,
-        },
-        {
-          id: 8,
-          title: "Breathable UV Protection Running Cap",
-          text: "Quick-dry, UV-blocking fabric shields you from the sun while keeping you cool and comfortable during outdoor workouts in any weather condition.",
-          price: 850,
-          origin_price: 1200,
-          category: "Accessories",
-          imageUrl: photoImg,
-        },
-      ],
-      reviews: [
-        {
-          id: 1,
-          stars: "★★★★★",
-          title: "Best running shoes ever",
-          text: "These shoes are incredibly lightweight and provide great support. My marathon time improved after switching to these.",
-        },
-        {
-          id: 2,
-          stars: "★★★★★",
-          title: "Perfect training gear",
-          text: "The moisture-wicking fabric keeps me dry during intense workouts. Highly recommend for serious athletes.",
-        },
-        {
-          id: 3,
-          stars: "★★★★☆",
-          title: "Great compression tights",
-          text: "Excellent muscle support during long runs. Reduced soreness significantly after my training sessions.",
-        },
-        {
-          id: 4,
-          stars: "★★★★★",
-          title: "Top quality sports bag",
-          text: "Spacious, durable and stylish. Fits all my gym equipment with room to spare. Worth every penny.",
-        },
-        {
-          id: 5,
-          stars: "★★★★★",
-          title: "Amazing trail running jacket",
-          text: "Windproof and water resistant without feeling bulky. Stayed comfortable through the entire trail race.",
-        },
-        {
-          id: 6,
-          stars: "★★★★☆",
-          title: "Solid performance socks",
-          text: "No blisters after 20km runs. The cushioning is just right and they hold their shape after many washes.",
-        },
-        {
-          id: 7,
-          stars: "★★★★★",
-          title: "Excellent yoga mat",
-          text: "Non-slip surface and perfect thickness. Great grip even during hot yoga sessions. Easy to clean too.",
-        },
-        {
-          id: 8,
-          stars: "★★★★★",
-          title: "Outstanding cycling helmet",
-          text: "Lightweight yet very protective. Ventilation is superb and the fit adjustment system works perfectly.",
-        },
-      ],
-      //product
-      swiperOptions: {
-        modules: [Navigation],
-        navigation: false,
-        slidesPerView: 2.1,
-        spaceBetween: 8,
-        centeredSlidesBounds: true,
-        slidesOffsetBefore: -270,
-        loop: true,
-        breakpoints: {
-          375: { slidesPerView: 2.3, lidesOffsetBefore: 0, spaceBetween: 8 },
-          576: { slidesPerView: 2.3, slidesOffsetBefore: 0, spaceBetween: 16 },
-          768: { slidesPerView: 3.5, slidesOffsetBefore: 0, spaceBetween: 16 },
-          992: { slidesPerView: 3.5, slidesOffsetBefore: 0, spaceBetween: 16 },
-          1200: { slidesPerView: 5.5, slidesOffsetBefore: -122, spaceBetween: 16 },
-        },
-      },
-      swiper2Options: {
-        modules: [Navigation],
-        navigation: false,
-        slidesPerView: 2.1,
-        spaceBetween: 8,
-        centeredSlidesBounds: true,
-        slidesOffsetBefore: -270,
-        loop: true,
-        breakpoints: {
-          375: { slidesPerView: 2.3, slidesOffsetBefore: 0, spaceBetween: 8 },
-          576: { slidesPerView: 2.3, slidesOffsetBefore: 0, spaceBetween: 8 },
-          768: { slidesPerView: 3.5, slidesOffsetBefore: 0, spaceBetween: 16 },
-          992: { slidesPerView: 2.5, slidesOffsetBefore: 0, spaceBetween: 16 },
-          1200: { slidesPerView: 4, slidesOffsetBefore: 0, spaceBetween: 16 },
-        },
-      },
-      reviewsOptions: {
-        modules: [Pagination, Autoplay],
-        pagination: { clickable: true },
-        autoplay: {
-          delay: 3000,
-          disableOnInteraction: false,
-        },
-        loop: false,
-        slidesPerView: 1,
-        breakpoints: {
-          768: { slidesPerView: 2 },
-          1024: { slidesPerView: 4 },
-        },
-      },
-      featureOptions: {
-        modules: [Autoplay],
-        autoplay: {
-          delay: 6000,
-          disableOnInteraction: false,
-        },
-        loop: false,
-        slidesPerView: 1,
-        breakpoints: {
-          992: { slidesPerView: 2 },
-          1200: { slidesPerView: 3 },
-        },
-      },
+      brands,
+      reviews,
+      allProducts: [],
+      saleProducts: [],
+      newProducts: [],
+      popularProducts: [],
+      swiperOptions: productOptions,
+      swiper2Options: newProductOptions,
+      reviewsOptions,
+      featureOptions,
     };
   },
   mounted() {
+    //頁面掛載後，監聽滾動事件，每次滾動就呼叫 handleParallax。
     window.addEventListener("scroll", this.handleParallax);
   },
   beforeUnmount() {
+    //頁面離開前，移除監聽，避免記憶體洩漏。
     window.removeEventListener("scroll", this.handleParallax);
   },
   methods: {
     handleParallax() {
+      if (!this.$refs.banner) return;
       const scrollY = window.scrollY;
       this.$refs.banner.style.backgroundPositionY = `${scrollY * 0.5}px`;
     },
+    getProduct() {
+      const api = `${import.meta.env.VITE_APP_API}api/${import.meta.env.VITE_APP_PATH}/products/all`;
+      this.$http.get(api).then((res) => {
+        this.allProducts = res.data.products;
+        this.saleProducts = this.allProducts.filter((p) => p.origin_price > p.price);
+        this.newProducts = [...this.allProducts].reverse().slice(0, 6);
+        this.popularProducts = [...this.allProducts].sort(() => Math.random() - 0.5).slice(0, 6);
+      });
+    },
+    addCart(id) {
+      this.cartStore.addCart(id, 1).then(() => {
+        const el = document.getElementById("CartOffcanvas");
+        const offcanvas = Offcanvas.getOrCreateInstance(el);
+        if (!el.classList.contains("show")) {
+          offcanvas.show();
+        }
+      });
+    },
   },
   created() {
-    console.log(import.meta.env.VITE_APP_API, import.meta.env.VITE_APP_PATH);
+    this.getProduct();
   },
 };
 </script>

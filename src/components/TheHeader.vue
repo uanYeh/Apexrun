@@ -40,22 +40,6 @@
                   </RouterLink>
                 </li>
               </ul>
-              <!-- <ul class="dropdown-menu rounded-0 mb-3 mb-lg-0">
-                <li><RouterLink class="dropdown-item" to="/products">All Products</RouterLink></li>
-                <li>
-                  <RouterLink class="dropdown-item" to="/products?category=shoes">Shoes</RouterLink>
-                </li>
-                <li>
-                  <RouterLink class="dropdown-item" to="/products?category=apparel"
-                    >Apparel</RouterLink
-                  >
-                </li>
-                <li>
-                  <RouterLink class="dropdown-item" to="/products?category=accessories"
-                    >Accessories</RouterLink
-                  >
-                </li>
-              </ul> -->
             </li>
             <li class="nav-item">
               <RouterLink
@@ -79,19 +63,22 @@
               >
             </li>
             <li class="nav-item d-lg-none">
-              <a class="link-hover nav-link fw-semibold fs-6" to="/return">Return</a>
+              <RouterLink class="link-hover nav-link fw-semibold fs-6" to="/return"
+                >Return</RouterLink
+              >
             </li>
             <li class="nav-item d-lg-none">
-              <RouterLink class="link-hover nav-link fw-semibold fs-6" href="#"
-                >My favorite</RouterLink
-              >
+              <a class="link-hover nav-link fw-semibold fs-6" href="#">My favorite</a>
             </li>
           </ul>
         </div>
+
+        <!-- 搜尋 -->
         <div class="position-relative z-1 search-container px-3 py-1 py-md-1">
-          <form class="d-flex align-items-center" role="search">
+          <form class="d-flex align-items-center" role="search" @submit.prevent="search">
             <i class="bi bi-search"></i>
             <input
+              v-model.trim="keyword"
               class="form-control me-1 me-md-2 border-0"
               type="search"
               placeholder="Search"
@@ -99,6 +86,7 @@
             />
           </form>
         </div>
+
         <a href="#" class="favorite ms-3 d-none d-lg-block">
           <i class="bi bi-heart fs-4 text-dark"></i>
         </a>
@@ -108,16 +96,18 @@
   </header>
   <TheCountdown />
 </template>
+
 <script>
 import Headroom from "headroom.js";
 import TheCountdown from "@/components/ui/TheCountdown.vue";
-import CartOffcanvas from "@/components/front/CartOffcanvas.vue";
+import CartOffcanvas from "@/components/CartOffcanvas.vue";
 
 export default {
   components: { CartOffcanvas, TheCountdown },
   data() {
     return {
       categories: [],
+      keyword: "", // 搜尋關鍵字
     };
   },
   mounted() {
@@ -154,6 +144,14 @@ export default {
       this.$http.get(api).then((res) => {
         this.categories = [...new Set(res.data.products.map((p) => p.category))];
       });
+    },
+    // 搜尋：按 Enter 後跳到商品頁
+    search() {
+      if (!this.keyword) {
+        this.$router.push("/products");
+        return;
+      }
+      this.$router.push({ path: "/products", query: { search: this.keyword } });
     },
   },
   created() {

@@ -29,67 +29,65 @@
         </div>
       </div>
       <div class="cart-pancel">
+        <a
+          @click.prevent="$router.back()"
+          href="#"
+          class="text-decoration-none text-muted mb-3 d-inline-block link-dark"
+        >
+          <i class="bi bi-arrow-left me-1"></i>Back to Cart
+        </a>
         <h4 class="fw-bold mb-3">Product Details</h4>
 
         <div class="row g-3 flex-">
           <div class="col-12 col-lg-8">
-            <div class="accordion accordion-flush mb-5" id="accordionFlushExample">
-              <div class="accordion-item">
-                <h2 class="accordion-header" id="flush-headingOne">
-                  <button
-                    class="accordion-button collapsed bg-light"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#flush-collapseOne"
-                    aria-expanded="false"
-                    aria-controls="flush-collapseOne"
+            <div class="mb-5">
+              <button
+                class="btn btn-light w-100 text-start rounded-0 d-flex justify-content-between align-items-center py-3 px-3"
+                type="button"
+                @click="isOpen = !isOpen"
+              >
+                <span>Cart ({{ cartStore.carts.length }} items)</span>
+                <i class="bi bi-chevron-down" :class="{ 'rotate-180': isOpen }"></i>
+              </button>
+              <div v-show="isOpen">
+                <ul class="list-unstyled mt-2">
+                  <li
+                    class="cart-item d-flex align-items-center py-2 border-bottom"
+                    v-for="item in cartStore.carts"
+                    :key="item.id"
                   >
-                    Cart (12items)
-                  </button>
-                </h2>
-                <div
-                  id="flush-collapseOne"
-                  class="accordion-collapse collapse"
-                  aria-labelledby="flush-headingOne"
-                  data-bs-parent="#accordionFlushExample"
-                >
-                  <div class="accordion-body p-0">
-                    <div class="row flex-column mb-4">
-                      <ul class="col-12 list-unstyled">
-                        <li
-                          class="cart-item d-flex align-items-center py-2 border-bottom"
-                          v-for="item in cartItems"
-                          :key="item.id"
-                        >
-                          <!-- 圖片 -->
-                          <img :src="item.imageUrl" alt="item.title" class="cart-item-img me-3" />
-
-                          <!-- 商品資訊 -->
-                          <div class="flex-grow-1">
-                            <p class="fw-bold mb-1 cart-item-title me-2">{{ item.title }}</p>
-                            <p class="text-muted small mb-1">Qty：1</p>
-                          </div>
-
-                          <!-- 價格 + 刪除 -->
-                          <div class="d-flex align-items-center gap-3 ms-3">
-                            <span class="fw-bold">$1,499</span>
-                          </div>
-                        </li>
-                      </ul>
+                    <img
+                      :src="item.product.imageUrl"
+                      :alt="item.product.title"
+                      class="cart-item-img me-3"
+                    />
+                    <div class="flex-grow-1">
+                      <p class="fw-bold mb-1 cart-item-title me-2">{{ item.product.title }}</p>
+                      <p class="text-muted small mb-1">Qty：{{ item.qty }}</p>
                     </div>
-                  </div>
-                </div>
+                    <div class="d-flex align-items-center gap-3 ms-3">
+                      <span class="fw-bold">${{ currency(item.total) }}</span>
+                    </div>
+                  </li>
+                </ul>
               </div>
             </div>
             <div class="col-12">
-              <div class="checkout-form">
-                <!-- Email Address -->
+              <Form @submit="placeOrder" class="checkout-form">
+                <!-- Email -->
                 <h4 class="fw-bold mb-3">Email Address</h4>
                 <div class="mb-4">
                   <label class="form-label fw-bold"
                     >Email Address <span class="text-danger">*</span></label
                   >
-                  <input type="email" class="form-control rounded-0" />
+                  <Field
+                    name="email"
+                    type="email"
+                    class="form-control rounded-0"
+                    rules="required|email"
+                    v-model="form.email"
+                  />
+                  <ErrorMessage name="email" class="text-danger fs-7" />
                 </div>
 
                 <!-- Delivery Address -->
@@ -99,31 +97,79 @@
                     <label class="form-label fw-bold"
                       >First Name <span class="text-danger">*</span></label
                     >
-                    <input type="text" class="form-control rounded-0" />
+                    <Field
+                      name="firstName"
+                      type="text"
+                      class="form-control rounded-0"
+                      rules="required"
+                      v-model="form.firstName"
+                    />
+                    <ErrorMessage name="firstName" class="text-danger fs-7" />
                   </div>
                   <div class="col-12 col-md-6">
                     <label class="form-label fw-bold"
                       >Last Name <span class="text-danger">*</span></label
                     >
-                    <input type="text" class="form-control rounded-0" />
+                    <Field
+                      name="lastName"
+                      type="text"
+                      class="form-control rounded-0"
+                      rules="required"
+                      v-model="form.lastName"
+                    />
+                    <ErrorMessage name="lastName" class="text-danger fs-7" />
+                  </div>
+                  <div class="col-12">
+                    <label class="form-label fw-bold"
+                      >Phone Number <span class="text-danger">*</span></label
+                    >
+                    <Field
+                      name="tel"
+                      type="tel"
+                      class="form-control rounded-0"
+                      rules="required"
+                      v-model="form.tel"
+                    />
+                    <ErrorMessage name="tel" class="text-danger fs-7" />
                   </div>
                   <div class="col-12">
                     <label class="form-label fw-bold"
                       >Street address <span class="text-danger">*</span></label
                     >
-                    <input type="text" class="form-control rounded-0" />
+                    <Field
+                      name="address"
+                      type="text"
+                      class="form-control rounded-0"
+                      rules="required"
+                      v-model="form.address"
+                    />
+                    <ErrorMessage name="address" class="text-danger fs-7" />
                   </div>
                   <div class="col-12 col-md-6">
                     <label class="form-label fw-bold"
                       >City <span class="text-danger">*</span></label
                     >
-                    <input type="text" class="form-control rounded-0" />
+                    <Field
+                      name="city"
+                      type="text"
+                      class="form-control rounded-0"
+                      rules="required"
+                      v-model="form.city"
+                    />
+                    <ErrorMessage name="city" class="text-danger fs-7" />
                   </div>
                   <div class="col-12 col-md-6">
                     <label class="form-label fw-bold"
-                      >zip code <span class="text-danger">*</span></label
+                      >Zip code <span class="text-danger">*</span></label
                     >
-                    <input type="text" class="form-control rounded-0" />
+                    <Field
+                      name="zip"
+                      type="text"
+                      class="form-control rounded-0"
+                      rules="required"
+                      v-model="form.zip"
+                    />
+                    <ErrorMessage name="zip" class="text-danger fs-7" />
                   </div>
                 </div>
 
@@ -134,35 +180,70 @@
                     <label class="form-label fw-bold"
                       >Name on card <span class="text-danger">*</span></label
                     >
-                    <input type="text" class="form-control rounded-0" />
+                    <Field
+                      name="cardName"
+                      type="text"
+                      class="form-control rounded-0"
+                      rules="required"
+                      v-model="form.cardName"
+                    />
+                    <ErrorMessage name="cardName" class="text-danger fs-7" />
                   </div>
                   <div class="col-12">
                     <label class="form-label fw-bold"
                       >Card Number <span class="text-danger">*</span></label
                     >
-                    <input
+                    <Field
+                      name="cardNumber"
                       type="text"
                       class="form-control rounded-0"
+                      rules="required|min:16|max:16"
                       placeholder="1234  1234  1234  1234"
+                      v-model="form.cardNumber"
                     />
+                    <ErrorMessage name="cardNumber" class="text-danger fs-7" />
                   </div>
                   <div class="col-12 col-md-6">
                     <label class="form-label fw-bold"
                       >Card expiry date <span class="text-danger">*</span></label
                     >
-                    <input type="text" class="form-control rounded-0" placeholder="MM/YY" />
+                    <Field
+                      name="cardExpiry"
+                      type="text"
+                      class="form-control rounded-0"
+                      rules="required"
+                      placeholder="MM/YY"
+                      v-model="form.cardExpiry"
+                    />
+                    <ErrorMessage name="cardExpiry" class="text-danger fs-7" />
                   </div>
                   <div class="col-12 col-md-6">
                     <label class="form-label fw-bold">&nbsp;</label>
-                    <input type="text" class="form-control rounded-0" placeholder="SVV" />
+                    <Field
+                      name="cardCvv"
+                      type="text"
+                      class="form-control rounded-0"
+                      rules="required|min:3|max:4"
+                      placeholder="CVV"
+                      v-model="form.cardCvv"
+                    />
+                    <ErrorMessage name="cardCvv" class="text-danger fs-7" />
                   </div>
                 </div>
 
-                <!-- Place Order -->
-                <button class="btn w-100 text-white fw-bold btn-primary rounded-0">
-                  place order
+                <button
+                  type="submit"
+                  class="btn w-100 text-white fw-bold btn-primary rounded-0 py-3"
+                  :disabled="isLoading"
+                >
+                  <span
+                    v-if="isLoading"
+                    class="spinner-border spinner-border-sm me-2"
+                    role="status"
+                  ></span>
+                  {{ isLoading ? "Processing..." : "Place Order" }}
                 </button>
-              </div>
+              </Form>
             </div>
           </div>
           <div class="col-12 col-lg-4">
@@ -173,11 +254,16 @@
               <!-- Subtotal & Shipping -->
               <div class="d-flex justify-content-between mb-2">
                 <span class="fw-bold">Subtotal</span>
-                <span>$120.00</span>
+                <span>${{ currency(cartStore.total) }}</span>
               </div>
-              <div class="d-flex justify-content-between mb-3">
+              <div
+                v-if="cartStore.total !== cartStore.finalTotal"
+                class="d-flex justify-content-between mb-3"
+              >
                 <span class="fw-bold">Discount</span>
-                <span>$12.00</span>
+                <span class="text-success"
+                  >-${{ currency(cartStore.total - cartStore.finalTotal) }}</span
+                >
               </div>
 
               <hr />
@@ -185,7 +271,7 @@
               <!-- Order Total -->
               <div class="d-flex justify-content-between mb-3">
                 <span class="fw-bold">Order Total</span>
-                <span class="fw-bold">$19.00</span>
+                <span class="fw-bold">${{ currency(cartStore.finalTotal) }}</span>
               </div>
             </div>
           </div>
@@ -199,45 +285,84 @@
 <script>
 import TheHeader from "@/components/TheHeader.vue";
 import TheFooter from "@/components/TheFooter.vue";
+import { useCartStore } from "@/stores/cart";
+import { currency } from "@/methods/filters";
+import { Form, Field, ErrorMessage, defineRule, configure } from "vee-validate";
+import { required, email, min, max } from "@vee-validate/rules";
+import { localize } from "@vee-validate/i18n";
+import axios from "axios";
+
+defineRule("required", required);
+defineRule("email", email);
+defineRule("min", min);
+defineRule("max", max);
+
+configure({
+  generateMessage: localize("en", {
+    messages: {
+      required: "{field} is required",
+      email: "Please enter a valid email",
+      min: "{field} must be at least {length} characters",
+      max: "{field} must be at most {length} characters",
+    },
+  }),
+});
 
 export default {
-  components: { TheHeader, TheFooter },
+  components: { TheHeader, TheFooter, Form, Field, ErrorMessage },
+  setup() {
+    const cartStore = useCartStore();
+    cartStore.getCart();
+    return { cartStore };
+  },
   data() {
     return {
-      cartItems: [
-        {
-          id: 1,
-          brand: "DECATHLON",
-          title:
-            "Prescription swimming goggles XBASE 200-600 degrees - Black (nose bridge blue-green)",
-          color: "Green",
-          qty: 1,
-          price: 1499,
-          imageUrl:
-            "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=200&h=200&fit=crop",
-        },
-        {
-          id: 2,
-          brand: "NIKE",
-          title: "Air Zoom Pegasus 40 Running Shoes",
-          color: "Black",
-          qty: 1,
-          price: 3200,
-          imageUrl:
-            "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&h=200&fit=crop",
-        },
-        {
-          id: 3,
-          brand: "NIKE",
-          title: "Air Zoom Pegasus 40 Running Shoes",
-          color: "Black",
-          qty: 1,
-          price: 3200,
-          imageUrl:
-            "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=200&h=200&fit=crop",
-        },
-      ],
+      isLoading: false,
+      isOpen: false,
+      form: {
+        email: "",
+        firstName: "",
+        lastName: "",
+        tel: "",
+        address: "",
+        city: "",
+        zip: "",
+        cardName: "",
+        cardNumber: "",
+        cardExpiry: "",
+        cardCvv: "",
+      },
     };
+  },
+  methods: {
+    currency,
+    async placeOrder() {
+      const user = {
+        name: `${this.form.firstName} ${this.form.lastName}`,
+        email: this.form.email,
+        tel: this.form.tel,
+        address: `${this.form.address}, ${this.form.city}, ${this.form.zip}`,
+      };
+      this.isLoading = true;
+      try {
+        const orderRes = await axios.post(
+          `${import.meta.env.VITE_APP_API}api/${import.meta.env.VITE_APP_PATH}/order`,
+          { data: { user } },
+        );
+        if (!orderRes.data.success) return;
+
+        const orderId = orderRes.data.orderId;
+
+        const payRes = await axios.post(
+          `${import.meta.env.VITE_APP_API}api/${import.meta.env.VITE_APP_PATH}/pay/${orderId}`,
+        );
+        if (payRes.data.success) {
+          this.$router.push(`/order/${orderId}`);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    },
   },
 };
 </script>

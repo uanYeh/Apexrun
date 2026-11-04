@@ -7,32 +7,9 @@
       <div class="row mb-4">
         <div class="col-12 col-md-6 col-lg-8">
           <div class="row g-2" id="product-gallery">
-            <div
-              class="col-12 col-lg-6"
-              v-for="(product, index) in visibleProducts"
-              :key="product.id"
-            >
-              <a :href="product.imageUrl" class="pswp-item">
-                <img :src="product.imageUrl" class="product-img" style="cursor: pointer" />
-              </a>
+            <div class="col-12">
+              <img :src="product.imageUrl" class="product-img w-100" />
             </div>
-
-            <div class="col-12 col-lg-6" v-if="products.length > 4">
-              <div class="product-more" @click="openLightboxAt(3)">
-                <i class="bi bi-plus-circle"></i>
-                <span>查看更多 +{{ products.length - 3 }}</span>
-              </div>
-            </div>
-
-            <!-- 隱藏圖片給 lightbox 用 -->
-            <template v-for="(product, index) in products.slice(3)" :key="'hidden-' + index">
-              <a
-                :href="product.imageUrl"
-                class="pswp-item d-none"
-                data-pswp-width="800"
-                data-pswp-height="600"
-              ></a>
-            </template>
           </div>
           <!-- <div class="row g-2">
 
@@ -74,29 +51,32 @@
           </div> -->
         </div>
         <div class="col-12 col-md-6 col-lg-4">
-          <!-- 標籤 + 品牌 -->
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="fs-7 px-2 badge bg-warning rounded-0 text-uppercase">Hot</span>
-            <span class="text-muted fs-6 fw-lighter">{{ products[0].category }}</span>
+          <!-- 標籤 + 分類-->
+          <div class="d-flex align-items-center mb-2">
+            <span
+              v-if="product.origin_price > product.price"
+              class="fs-7 px-2 badge bg-warning rounded-0 text-uppercase"
+              >sale</span
+            >
+            <span class="text-muted fs-6 fw-lighter ms-auto">{{ product.category }}</span>
           </div>
-
           <!-- 標題 -->
-          <h3 class="fw-bold mb-2">{{ products[0].title }}</h3>
-          <div class="fs-6 mb-2">{{ products[0].text }}</div>
+          <h3 class="fw-bold mb-2">{{ product.title }}</h3>
+          <div class="fs-6 mb-2">{{ product.description }}</div>
 
-          <!-- 評分 -->
-          <p class="mb-2"><i class="bi bi-star-fill text-warning"></i> 4.8</p>
+          <!-- 評分 //隨機給，因為沒有api-->
+          <p class="mb-2"><i class="bi bi-star-fill text-warning"></i> {{ rating }}</p>
 
           <!-- 價格 -->
           <div class="mb-2 mb-lg-4">
-            <span class="fs-2 fw-bold text-dark">${{ products[0].price }}</span>
+            <span class="fs-2 fw-bold text-dark">${{ currency(product.price) }}</span>
             <span class="text-muted text-decoration-line-through ms-2"
-              >${{ products[0].origin_price }}</span
+              >${{ product.origin_price }}</span
             >
           </div>
 
-          <!-- 尺寸 -->
-          <div class="mb-2 mb-lg-4">
+          <!-- 尺寸 沒有尺寸，先關閉-->
+          <!-- <div class="mb-2 mb-lg-4">
             <p class="mb-2">Size :</p>
             <select class="form-select rounded-0" v-model="selectedSize">
               <option value="">Please select your size.</option>
@@ -105,7 +85,7 @@
               <option value="L">L</option>
               <option value="XL">XL</option>
             </select>
-          </div>
+          </div> -->
 
           <!-- 數量 -->
           <div class="mb-4">
@@ -122,7 +102,16 @@
           </div>
 
           <!-- 加入購物車 -->
-          <button class="btn w-100 rounded-0 py-3 fw-bold bg-primary text-white">
+          <button
+            class="btn w-100 rounded-0 py-3 fw-bold bg-primary text-white"
+            @click="addCart(product.id)"
+            :disabled="status.LoadingItem == product.id && status.LoadingItem !== ''"
+          >
+            <span
+              v-if="status.LoadingItem == product.id && status.LoadingItem !== ''"
+              class="spinner-border spinner-border-sm text-white me-2"
+              role="status"
+            ></span>
             Add to cart
           </button>
         </div>
@@ -172,44 +161,36 @@
         <!-- 內容 -->
         <div class="tab-content py-4 px-0 px-lg-3 mb-2 mb-lg-4" id="productTabContent">
           <div class="tab-pane fade show active" id="details" role="tabpanel">
-            <h5 class="fw-bold mb-2">About This Item</h5>
+            <h5 class="fw-bold mb-2">Details</h5>
             <p class="text-muted">
-              About This Item Dress your little one in comfort with these sleep and play pajamas
-              featuring playful dinosaur foot art. Made from soft interlock fabric, they ensure easy
-              dressing and all-night coziness. The charming navy design is perfect for little
-              adventurers, while the STANDARD 100 by OEKO-TEX® certification guarantees a safe,
-              quality fabric for your baby's sensitive skin. Ideal for seasonal wear, these pajamas
-              combine style with practicality, making bedtime a breeze for both kids and parents.
-              Embrace the joy of playful prints while providing the comfort your child deserves.
-              Design You Can Trust Footed design with playful dinosaur foot art. Cuddle tab™
-              protects little chins. Soft interlock fabric ensures cozy wear. Long sleeves for added
-              warmth. Foldover mitts on newborn & 3M sizes.
+              {{ product.content }}
             </p>
           </div>
           <div class="tab-pane fade" id="size" role="tabpanel">
             <h5 class="fw-bold mb-3">Size & Fit</h5>
-            <p class="text-muted">Please refer to our size guide for the best fit.</p>
+            <SizeGuideTab :category="product.category" />
           </div>
           <div class="tab-pane fade" id="material" role="tabpanel">
             <h5 class="fw-bold mb-3">Material / Composition</h5>
-            <p class="text-muted">100% Polyester</p>
+            <ProductInfoTabs :category="product.category" tab="material" />
           </div>
         </div>
 
         <!--Recently Seen-->
-        <div class="py-4 px-0 px-lg-3 mb-2 mb-lg-5">
+        <div v-if="recentProducts.length > 0" class="py-4 px-0 px-lg-3 mb-2 mb-lg-5">
           <h5 class="theme-title fw-bold mb-4">Recently Seen</h5>
           <Swiper v-bind="swiperOptions">
             <SwiperSlide class="col-6 col-md-3" v-for="item in recentProducts" :key="item.id">
-              <ProductCard :product="item" />
+              <ProductCard :product="item" @add-cart="addCart" />
             </SwiperSlide>
           </Swiper>
         </div>
+        <!-- You might like -->
         <div class="py-4 px-0 px-lg-3 mb-2 mb-lg-5">
           <h5 class="theme-title fw-bold mb-4">You might like</h5>
           <Swiper v-bind="swiperOptions">
-            <SwiperSlide class="col-6 col-md-3" v-for="item in recentProducts" :key="item.id">
-              <ProductCard :product="item" />
+            <SwiperSlide class="col-6 col-md-3" v-for="item in mightLikeProducts" :key="item.id">
+              <ProductCard :product="item" @add-cart="addCart" />
             </SwiperSlide>
           </Swiper>
         </div>
@@ -227,10 +208,15 @@ import { Navigation } from "swiper/modules";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import "photoswipe/style.css";
 
-import TheHeader from "@/components/front/TheHeader.vue";
-import TheFooter from "@/components/front/TheFooter.vue";
+import TheHeader from "@/components/TheHeader.vue";
+import TheFooter from "@/components/TheFooter.vue";
 import TheBreadcrumb from "@/components/ui/TheBreadcrumb.vue";
-import ProductCard from "@/components/front/ProductCard.vue";
+import ProductCard from "@/components/ProductCard.vue";
+import { currency } from "@/methods/filters";
+import SizeGuideTab from "@/components/ui/SizeGuideTab.vue";
+import ProductInfoTabs from "@/components/ui/ProductInfoTabs.vue";
+import { useCartStore } from "@/stores/cart";
+import { Offcanvas } from "bootstrap";
 
 import "swiper/css";
 import "swiper/css/navigation";
@@ -238,6 +224,10 @@ import "swiper/css/pagination";
 import "swiper/css/autoplay";
 
 export default {
+  setup() {
+    const cartStore = useCartStore();
+    return { cartStore };
+  },
   components: {
     TheHeader,
     TheFooter,
@@ -245,125 +235,21 @@ export default {
     ProductCard,
     Swiper,
     SwiperSlide,
+    SizeGuideTab,
+    ProductInfoTabs,
   },
   data() {
     return {
+      product: {},
+      photos: [], // 圖片 gallery 用
+      selectedSize: "",
       qty: 1,
       lightbox: null,
-      selectedSize: "",
-      products: [
-        {
-          id: 1,
-          title: "Ultra Boost Running Shoes Pro Edition",
-          text: "Engineered for long-distance runners, featuring ultra-lightweight cushioning technology that delivers exceptional rebound and comfort across all surfaces.",
-          price: 3200,
-          origin_price: 4500,
-          category: "Shoes",
-          imageUrl:
-            "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=390&h=336&fit=crop",
-        },
-        {
-          id: 2,
-          title: "Lightweight Sport Performance Jacket",
-          text: "A breathable, wind-resistant jacket with water-repellent fabric, designed to keep you performing at your best whether on a morning run or intense training session.",
-          price: 2800,
-          origin_price: 3800,
-          category: "Apparel",
-          imageUrl: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=800",
-        },
-        {
-          id: 3,
-          title: "High Compression Training Tights",
-          text: "High-elasticity compression design promotes blood circulation, reduces muscle fatigue, and enhances both athletic performance and post-workout recovery.",
-          price: 1500,
-          origin_price: 2000,
-          category: "Apparel",
-          imageUrl: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800",
-        },
-        {
-          id: 4,
-          title: "All Terrain Trail Running Shoes",
-          text: "Reinforced grip outsole adapts to gravel, mud, and rugged terrain, keeping your stride stable and confident on every trail running adventure.",
-          price: 4200,
-          origin_price: 5500,
-          category: "Shoes",
-          imageUrl: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=800",
-        },
-        {
-          id: 5,
-          title: "Waterproof Multi-Pocket Sports Bag",
-          text: "Durable waterproof material paired with a versatile multi-pocket layout, making it easy to organize your gear for the gym, trails, or any outdoor activity.",
-          price: 1800,
-          origin_price: 2500,
-          category: "Accessories",
-          imageUrl: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800",
-        },
-      ],
-      recentProducts: [
-        {
-          id: 1,
-          title: "Ultra Boost Running Shoes Pro Edition",
-          text: "Engineered for long-distance runners, featuring ultra-lightweight cushioning technology that delivers exceptional rebound and comfort across all surfaces.",
-          price: 3200,
-          origin_price: 4500,
-          category: "Ultra Boost Running",
-          imageUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
-        },
-        {
-          id: 2,
-          title: "Lightweight Sport Performance Jacket",
-          text: "A breathable, wind-resistant jacket with water-repellent fabric, designed to keep you performing at your best whether on a morning run or intense training session.",
-          price: 2800,
-          origin_price: 3800,
-          category: "Apparel",
-          imageUrl: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=800",
-        },
-        {
-          id: 3,
-          title: "High Compression Training Tights",
-          text: "High-elasticity compression design promotes blood circulation, reduces muscle fatigue, and enhances both athletic performance and post-workout recovery.",
-          price: 1500,
-          origin_price: 2000,
-          category: "Apparel",
-          imageUrl: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=800",
-        },
-        {
-          id: 4,
-          title: "All Terrain Trail Running Shoes",
-          text: "Reinforced grip outsole adapts to gravel, mud, and rugged terrain, keeping your stride stable and confident on every trail running adventure.",
-          price: 4200,
-          origin_price: 5500,
-          category: "Shoes",
-          imageUrl: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=800",
-        },
-        {
-          id: 5,
-          title: "Waterproof Multi-Pocket Sports Bag",
-          text: "Durable waterproof material paired with a versatile multi-pocket layout, making it easy to organize your gear for the gym, trails, or any outdoor activity.",
-          price: 1800,
-          origin_price: 2500,
-          category: "Accessories",
-          imageUrl: "https://images.unsplash.com/photo-1556906781-9a412961d28e?w=800",
-        },
-        {
-          id: 6,
-          title: "Breathable UV Protection Running Cap",
-          text: "Quick-dry, UV-blocking fabric shields you from the sun while keeping you cool and comfortable during outdoor workouts in any weather condition.",
-          price: 850,
-          origin_price: 1200,
-          category: "Accessories",
-          imageUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
-        },
-        {
-          id: 7,
-          title: "Breathable UV Protection Running Cap",
-          text: "Quick-dry, UV-blocking fabric shields you from the sun while keeping you cool and comfortable during outdoor workouts in any weather condition.",
-          price: 850,
-          origin_price: 1200,
-          category: "Accessories",
-          imageUrl: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=800",
-        },
-      ],
+      recentProducts: [], //recent
+      mightLikeProducts: [], //might like
+      status: {
+        LoadingItem: "",
+      },
       swiperOptions: {
         modules: [Navigation],
         navigation: false,
@@ -372,6 +258,7 @@ export default {
         centeredSlidesBounds: true,
         slidesOffsetBefore: -270,
         loop: true,
+        rating: (Math.random() * (5 - 4.2) + 4.2).toFixed(1),
         breakpoints: {
           375: { slidesPerView: 2.3, slidesOffsetBefore: 0, spaceBetween: 8 },
           576: { slidesPerView: 2.3, slidesOffsetBefore: 0, spaceBetween: 16 },
@@ -409,6 +296,68 @@ export default {
     });
   },
   methods: {
+    currency,
+    getProduct() {
+      const id = this.$route.params.id;
+      const api = `${import.meta.env.VITE_APP_API}api/${import.meta.env.VITE_APP_PATH}/product/${id}`;
+      this.$http.get(api).then((res) => {
+        // console.log("res:", res.data);
+        this.product = res.data.product;
+        this.saveToRecent(id);
+        this.getRelated();
+      });
+    },
+    // addCart(id) {
+    //   this.status.LoadingItem = id;
+    //   const api = `${import.meta.env.VITE_APP_API}api/${import.meta.env.VITE_APP_PATH}/cart`;
+    //   const cart = { product_id: id, qty: this.qty };
+    //   this.$http.post(api, { data: cart }).then((res) => {
+    //     this.status.LoadingItem = "";
+    //     console.log(res);
+    //   });
+    // },
+    // addCart(id) {
+    //   this.status.LoadingItem = id;
+    //   this.cartStore.addCart(id, this.qty).then(() => {
+    //     this.status.LoadingItem = "";
+    //   });
+    // },
+    addCart(id) {
+      this.status.LoadingItem = id;
+      this.cartStore.addCart(id, this.qty).then(() => {
+        this.status.LoadingItem = "";
+        const el = document.getElementById("CartOffcanvas");
+        const offcanvas = Offcanvas.getOrCreateInstance(el);
+        if (!el.classList.contains("show")) {
+          offcanvas.show();
+        }
+      });
+    },
+    //You might like
+    getRelated() {
+      const api = `${import.meta.env.VITE_APP_API}api/${import.meta.env.VITE_APP_PATH}/products/all`;
+      this.$http.get(api).then((res) => {
+        this.mightLikeProducts = res.data.products
+          .filter((p) => p.category === this.product.category && p.id !== this.product.id)
+          .slice(0, 7);
+      });
+    },
+    saveToRecent(id) {
+      let recent = JSON.parse(localStorage.getItem("recentProducts") || "[]");
+      recent = recent.filter((item) => item !== id);
+      recent.unshift(id);
+      recent = recent.slice(0, 8);
+      localStorage.setItem("recentProducts", JSON.stringify(recent));
+    },
+    getRecentProducts() {
+      const recent = JSON.parse(localStorage.getItem("recentProducts") || "[]");
+      const ids = recent.filter((id) => id !== this.$route.params.id);
+      const api = `${import.meta.env.VITE_APP_API}api/${import.meta.env.VITE_APP_PATH}/products/all`;
+      this.$http.get(api).then((res) => {
+        const all = res.data.products;
+        this.recentProducts = ids.map((id) => all.find((p) => p.id === id)).filter(Boolean);
+      });
+    },
     openLightboxAt(index) {
       if (this.lightbox) {
         this.lightbox.loadAndOpen(index);
@@ -416,12 +365,20 @@ export default {
     },
   },
   computed: {
-    visibleProducts() {
-      if (this.products.length > 4) {
-        return this.products.slice(0, 3); // 只顯示前3張，第4格留給「查看更多」
-      }
-      return this.products.slice(0, 4); // 不超過4張就全顯示
+    rating() {
+      const seed = this.product.id ? this.product.id.charCodeAt(0) : 0;
+      return (4.5 + (seed % 9) * 0.1).toFixed(1);
     },
+  },
+  watch: {
+    "$route.params.id"() {
+      this.getProduct();
+      this.getRecentProducts();
+    },
+  },
+  created() {
+    this.getProduct();
+    this.getRecentProducts();
   },
 };
 </script>

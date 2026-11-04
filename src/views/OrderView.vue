@@ -29,30 +29,34 @@
         </div>
       </div>
       <div class="order-pancel col-8">
-        <div class="text-center">
-          <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem"></i>
+        <div class="text-center mb-4">
+          <div class="success-checkmark mb-3">
+            <svg viewBox="0 0 52 52" class="checkmark-svg">
+              <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
+              <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+            </svg>
+          </div>
+          <!-- <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem"></i> -->
           <p class="fs-3 fw-bold text-primary mb-0">Your Purchase is Complete</p>
-          <p>Thank you for purchasing from Carpento.</p>
+          <p>Thank you for purchasing from APEXRUN.</p>
         </div>
-        <div class="order-confirm p-4 border">
+        <div class="order-confirm p-4 border" v-if="order">
           <!-- Order Summary -->
           <h4 class="fw-bold mb-3">Order Summary</h4>
           <hr />
 
           <div class="row mb-3">
             <div class="col-12 col-md-6">
-              <p class="mb-1">Order Number: {{ order.orderNumber }}</p>
-              <p class="mb-1">Payment Status: {{ order.paymentStatus }}</p>
-              <p class="mb-1">Paid Date: {{ order.paidDate }}</p>
-              <p class="mb-1">Total: ${{ order.total }}</p>
-              <p class="mb-1">Quantity: {{ order.quantity }}</p>
+              <p class="mb-1">Order Number: {{ order.id }}</p>
+              <p class="mb-1">Payment Status: {{ order.is_paid ? "Paid" : "Unpaid" }}</p>
+              <p class="mb-1">Total: ${{ currency(order.total) }}</p>
             </div>
             <div class="col-12 col-md-6">
-              <p class="mb-1">Name：{{ order.name }}</p>
-              <p class="mb-1">Email：{{ order.email }}</p>
-              <p class="mb-1">Tel：{{ order.tel }}</p>
+              <p class="mb-1">Name：{{ order.user.name }}</p>
+              <p class="mb-1">Email：{{ order.user.email }}</p>
+              <p class="mb-1">Tel：{{ order.user.tel }}</p>
               <p class="mb-1">Shipping Address：</p>
-              <p class="mb-1">{{ order.address }}</p>
+              <p class="mb-1">{{ order.user.address }}</p>
             </div>
           </div>
 
@@ -65,29 +69,29 @@
             <ul class="col-12 list-unstyled">
               <li
                 class="cart-item d-flex align-items-center py-2 border-bottom"
-                v-for="item in order.products"
+                v-for="item in Object.values(order.products)"
                 :key="item.id"
               >
-                <!-- 圖片 -->
-                <img :src="item.imageUrl" alt="item.title" class="cart-item-img me-3" />
-
-                <!-- 商品資訊 -->
+                <img
+                  :src="item.product.imageUrl"
+                  :alt="item.product.title"
+                  class="cart-item-img me-3"
+                />
                 <div class="flex-grow-1">
-                  <p class="fw-bold mb-1 cart-item-title me-2">{{ item.title }}</p>
-                  <p class="text-muted small mb-1">Qty：1</p>
+                  <p class="fw-bold mb-1 cart-item-title me-2">{{ item.product.title }}</p>
+                  <p class="text-muted small mb-1">Qty：{{ item.qty }}</p>
                 </div>
-
-                <!-- 價格 + 刪除 -->
                 <div class="d-flex align-items-center gap-3 ms-3">
-                  <span class="fw-bold">$1,499</span>
+                  <span class="fw-bold">${{ currency(item.total) }}</span>
                 </div>
               </li>
             </ul>
           </div>
+
           <!-- Order Total -->
           <div class="d-flex justify-content-between align-items-center">
             <h6 class="fw-bold">Order Total</h6>
-            <h6 class="fw-bold">${{ order.total }}.00</h6>
+            <h6 class="fw-bold">${{ currency(order.total) }}</h6>
           </div>
         </div>
       </div>
@@ -99,47 +103,28 @@
 <script>
 import TheHeader from "@/components/TheHeader.vue";
 import TheFooter from "@/components/TheFooter.vue";
+import axios from "axios";
+import { currency } from "@/methods/filters";
 
 export default {
   components: { TheHeader, TheFooter },
   data() {
     return {
-      order: {
-        orderNumber: "-OzvlXqzKouKTjr8xltA",
-        paymentStatus: "Paid",
-        paidDate: "Thu Aug 13 2026",
-        total: 499,
-        quantity: 1,
-        name: "444 4",
-        email: "4242422@GMAIL.COM",
-        tel: "44444444",
-        address: "4242, 242, 44, 44 44",
-        products: [
-          {
-            id: 1,
-            brand: "DECATHLON",
-            title:
-              "Prescription swimming goggles XBASE 200-600 degrees - Black (nose bridge blue-green)",
-            color: "Green",
-            qty: 1,
-            price: 399,
-            imageUrl:
-              "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=120&h=120&fit=crop",
-          },
-          {
-            id: 2,
-            brand: "DECATHLON",
-            title:
-              "Prescription swimming goggles XBASE 200-600 degrees - Black (nose bridge blue-green)",
-            color: "Green",
-            qty: 1,
-            price: 399,
-            imageUrl:
-              "https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?w=120&h=120&fit=crop",
-          },
-        ],
-      },
+      order: null,
     };
+  },
+  methods: {
+    currency,
+    async getOrder() {
+      const id = this.$route.params.id;
+      const res = await axios.get(
+        `${import.meta.env.VITE_APP_API}api/${import.meta.env.VITE_APP_PATH}/order/${id}`,
+      );
+      this.order = res.data.order;
+    },
+  },
+  created() {
+    this.getOrder();
   },
 };
 </script>

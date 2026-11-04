@@ -51,6 +51,11 @@
   }
 }
 
+.product-card .icon-cart.is-loading,
+.product-card .icon-cart.is-loading:hover {
+  background-color: var(--bs-primary) !important;
+  color: #fff !important;
+}
 .bi-cart-plus-fill {
   padding: 2px;
   @include media-breakpoint-up(lg) {
@@ -444,4 +449,51 @@ $area-img-width-xl: percentage(1 / 5); // = 25%
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.no-spinner::-webkit-inner-spin-button,
+.no-spinner::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.no-spinner {
+  -moz-appearance: textfield;
+}
+
+.order-pancel {
+  .success-checkmark {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+  }
+
+  .checkmark-svg {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    stroke: var(--bs-primary);
+    stroke-width: 2;
+  }
+
+  .checkmark-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 2;
+    animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+  }
+
+  .checkmark-check {
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.6s forwards;
+  }
+
+  @keyframes stroke {
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
 }
