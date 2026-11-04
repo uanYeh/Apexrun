@@ -76,25 +76,20 @@
               aria-label="Close"
             ></button>
             <div class="bg-primary text-white text-center p-5">
-              <p class="fs-6 text-uppercase fw-semibold mb-2">
-                Anniversary Sale — Oct 9 to Oct 18 <br />
-              </p>
-              <span>Spend NT$2,500+ and use code at checkout for 20% off.</span>
+              <p class="fs-6 text-uppercase fw-semibold mb-2">Year-End Sale</p>
               <h2 class="display-4 fw-bold mb-2">20% OFF</h2>
-              <p class="mb-4">Use code: <span class="fw-bold text-warning">SPORT20</span></p>
-              <button
-                class="btn btn-light rounded-0 px-4"
-                @click="copyCoupon"
-                data-bs-dismiss="modal"
-              >
+              <p class="mb-4">
+                Use code at checkout: <span class="fw-bold text-warning">SPORT20</span>
+              </p>
+              <button class="btn btn-light rounded-0 px-4" @click="copyCoupon">
                 {{ copied ? "COPIED!" : "COPY CODE" }}
               </button>
             </div>
           </div>
         </div>
       </div>
-    </div></Teleport
-  >
+    </div>
+  </Teleport>
 </template>
 <script>
 import Modal from "bootstrap/js/dist/modal";
@@ -103,22 +98,32 @@ export default {
   data() {
     return {
       copied: false,
+      modal: null,
     };
   },
   mounted() {
     // const seen = localStorage.getItem("couponSeen");
     // if (!seen) {
-    const modal = new Modal(this.$refs.couponModal);
+    this.modal = new Modal(this.$refs.couponModal);
     setTimeout(() => {
-      modal.show();
+      this.modal.show();
     }, 500);
     // }
+  },
+  beforeUnmount() {
+    // 離開首頁時清掉 modal，避免殘留的灰色背景
+    if (this.modal) this.modal.dispose();
   },
   methods: {
     copyCoupon() {
       navigator.clipboard.writeText("SPORT20");
       this.copied = true;
       localStorage.setItem("couponSeen", "true");
+      // 顯示 COPIED! 1 秒後再關閉
+      setTimeout(() => {
+        this.modal.hide();
+        this.copied = false;
+      }, 1000);
     },
   },
 };

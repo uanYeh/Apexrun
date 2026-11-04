@@ -58,7 +58,15 @@ const router = createRouter({
       name: "Order",
       component: () => import("@/views/OrderView.vue"),
     },
+    {
+      path: "/favorite",
+      name: "Favorite",
+      component: () => import("@/views/FavoriteView.vue"),
+    },
   ],
+  scrollBehavior() {
+    return { top: 0 };
+  },
 });
 
 export default router;

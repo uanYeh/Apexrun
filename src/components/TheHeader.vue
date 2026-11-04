@@ -67,8 +67,11 @@
                 >Return</RouterLink
               >
             </li>
+            <!-- 手機選單：My favorite -->
             <li class="nav-item d-lg-none">
-              <a class="link-hover nav-link fw-semibold fs-6" href="#">My favorite</a>
+              <RouterLink class="link-hover nav-link fw-semibold fs-6" to="/favorite"
+                >My favorite</RouterLink
+              >
             </li>
           </ul>
         </div>
@@ -76,7 +79,9 @@
         <!-- 搜尋 -->
         <div class="position-relative z-1 search-container px-3 py-1 py-md-1">
           <form class="d-flex align-items-center" role="search" @submit.prevent="search">
-            <i class="bi bi-search"></i>
+            <button type="submit" class="btn p-0 border-0 search-btn" aria-label="Search">
+              <i class="bi bi-search"></i>
+            </button>
             <input
               v-model.trim="keyword"
               class="form-control me-1 me-md-2 border-0"
@@ -87,9 +92,18 @@
           </form>
         </div>
 
-        <a href="#" class="favorite ms-3 d-none d-lg-block">
-          <i class="bi bi-heart fs-4 text-dark"></i>
-        </a>
+        <!-- 桌機版：愛心連到收藏頁（有收藏時變實心） -->
+        <RouterLink
+          to="/favorite"
+          class="favorite ms-3 d-none d-lg-block"
+          aria-label="My favorites"
+        >
+          <i
+            class="bi fs-4"
+            :class="favoriteStore.count ? 'bi-heart-fill' : 'bi-heart'"
+            :style="{ color: favoriteStore.count ? '#e53935' : '#212529' }"
+          ></i>
+        </RouterLink>
         <CartOffcanvas />
       </div>
     </nav>
@@ -101,9 +115,15 @@
 import Headroom from "headroom.js";
 import TheCountdown from "@/components/ui/TheCountdown.vue";
 import CartOffcanvas from "@/components/CartOffcanvas.vue";
+import { useFavoriteStore } from "@/stores/favorite";
 
 export default {
   components: { CartOffcanvas, TheCountdown },
+  // 收藏 store：判斷 Header 愛心要不要實心
+  setup() {
+    const favoriteStore = useFavoriteStore();
+    return { favoriteStore };
+  },
   data() {
     return {
       categories: [],
@@ -152,6 +172,14 @@ export default {
         return;
       }
       this.$router.push({ path: "/products", query: { search: this.keyword } });
+    },
+  },
+  watch: {
+    "$route.query.search": {
+      handler(val) {
+        this.keyword = val || "";
+      },
+      immediate: true, // 一進頁面就先同步一次
     },
   },
   created() {

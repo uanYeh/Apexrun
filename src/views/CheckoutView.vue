@@ -46,30 +46,11 @@
                 type="button"
                 @click="isOpen = !isOpen"
               >
-                <span>Cart ({{ cartStore.carts.length }} items)</span>
+                <span>Cart ({{ totalQty }} items)</span>
                 <i class="bi bi-chevron-down" :class="{ 'rotate-180': isOpen }"></i>
               </button>
               <div v-show="isOpen">
-                <ul class="list-unstyled mt-2">
-                  <li
-                    class="cart-item d-flex align-items-center py-2 border-bottom"
-                    v-for="item in cartStore.carts"
-                    :key="item.id"
-                  >
-                    <img
-                      :src="item.product.imageUrl"
-                      :alt="item.product.title"
-                      class="cart-item-img me-3"
-                    />
-                    <div class="flex-grow-1">
-                      <p class="fw-bold mb-1 cart-item-title me-2">{{ item.product.title }}</p>
-                      <p class="text-muted small mb-1">Qty：{{ item.qty }}</p>
-                    </div>
-                    <div class="d-flex align-items-center gap-3 ms-3">
-                      <span class="fw-bold">${{ currency(item.total) }}</span>
-                    </div>
-                  </li>
-                </ul>
+                <CartItemList :editable="false" class="mt-2" />
               </div>
             </div>
             <div class="col-12">
@@ -291,6 +272,7 @@ import { Form, Field, ErrorMessage, defineRule, configure } from "vee-validate";
 import { required, email, min, max } from "@vee-validate/rules";
 import { localize } from "@vee-validate/i18n";
 import axios from "axios";
+import CartItemList from "@/components/CartItemList.vue";
 
 defineRule("required", required);
 defineRule("email", email);
@@ -309,7 +291,7 @@ configure({
 });
 
 export default {
-  components: { TheHeader, TheFooter, Form, Field, ErrorMessage },
+  components: { TheHeader, TheFooter, Form, Field, ErrorMessage, CartItemList },
   setup() {
     const cartStore = useCartStore();
     cartStore.getCart();
@@ -343,11 +325,23 @@ export default {
         tel: this.form.tel,
         address: `${this.form.address}, ${this.form.city}, ${this.form.zip}`,
       };
+
+      // ✅ 新增：把每個商品的規格整理成文字，放進訂單備註
+      // 例如：Sports Tee - Black / M × 1、Sports Tee - Black / L × 2
+      const message = this.cartStore.carts
+        .flatMap((item) =>
+          this.cartStore.variantsOf(item).map((v) => {
+            const label = this.variantLabel(v);
+            return `${item.product.title}${label ? ` - ${label}` : ""} × ${v.qty}`;
+          }),
+        )
+        .join("、");
+
       this.isLoading = true;
       try {
         const orderRes = await axios.post(
           `${import.meta.env.VITE_APP_API}api/${import.meta.env.VITE_APP_PATH}/order`,
-          { data: { user } },
+          { data: { user, message } }, // ✏️ 修改：多帶 message
         );
         if (!orderRes.data.success) return;
 
@@ -361,7 +355,18 @@ export default {
         }
       } catch (e) {
         console.error(e);
+      } finally {
+        this.isLoading = false; // ✅ 新增：不論成功或失敗，按鈕都恢復
       }
+    },
+    variantLabel(v) {
+      return [v.color, v.size].filter(Boolean).join(" / ");
+    },
+  },
+  computed: {
+    // 購物車總件數
+    totalQty() {
+      return this.cartStore.carts.reduce((sum, item) => sum + item.qty, 0);
     },
   },
 };

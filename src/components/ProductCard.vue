@@ -3,6 +3,20 @@
     <div class="photo-img">
       <img :src="product.imageUrl" class="card-img-top rounded-0" :alt="product.title" />
     </div>
+    <!-- 收藏按鈕 -->
+    <button
+      type="button"
+      class="btn-favorite position-absolute top-0 end-0 m-2 z-2"
+      :aria-label="isFavorite(product.id) ? 'Remove from favorites' : 'Add to favorites'"
+      @click.prevent.stop="toggleFavorite(product.id)"
+    >
+      <span class="heart-icon">
+        <i
+          class="bi heart-icon"
+          :class="isFavorite(product.id) ? 'bi-heart-fill is-active' : 'bi-heart'"
+        ></i>
+      </span>
+    </button>
     <p
       v-if="product.origin_price > product.price"
       class="position-absolute bg-warning px-2 py-0 mt-1 text-uppercase fw-semibold"
@@ -49,6 +63,7 @@
 <script>
 import { mapState } from "pinia";
 import { useCartStore } from "@/stores/cart";
+import { useFavoriteStore } from "@/stores/favorite";
 
 export default {
   props: ["product"],
@@ -56,6 +71,7 @@ export default {
 
   computed: {
     ...mapState(useCartStore, ["loadingItem"]),
+    ...mapState(useFavoriteStore, ["favorites"]),
   },
 
   methods: {
@@ -63,8 +79,14 @@ export default {
       if (this.loadingItem) return;
       this.$emit("add-cart", id);
     },
+    isFavorite(id) {
+      return this.favorites.includes(id);
+    },
     getProduct(id) {
       this.$router.push(`product/${id}`);
+    },
+    toggleFavorite(id) {
+      useFavoriteStore().toggleFavorite(id);
     },
   },
 };

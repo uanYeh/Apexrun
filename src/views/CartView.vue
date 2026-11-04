@@ -29,65 +29,11 @@
         </div>
       </div>
       <div class="cart-pancel">
-        <p class="fs-5 fw-bolder">Cart ({{ cartStore.carts.length }} items)</p>
+        <p class="fs-5 fw-bolder">Cart ({{ totalQty }} items)</p>
         <div class="row g-3">
-          <ul class="col-12 col-lg-8 list-unstyled">
-            <li
-              class="cart-item d-flex align-items-center py-3 border-bottom"
-              v-for="item in cartStore.carts"
-              :key="item.id"
-            >
-              <!-- 圖片 -->
-              <img
-                :src="item.product.imageUrl"
-                :alt="item.product.title"
-                class="cart-item-img me-3"
-              />
+          <!-- ✏️ 修改：改用共用的購物車列表 -->
+          <CartItemList class="col-12 col-lg-8" />
 
-              <!-- 商品資訊 -->
-              <div class="flex-grow-1">
-                <p class="fw-bold mb-1 cart-item-title me-2">{{ item.product.title }}</p>
-
-                <!-- 數量控制 -->
-
-                <div
-                  class="d-inline-flex border"
-                  :style="loadingId === item.id ? 'pointer-events: none; opacity: 0.5' : ''"
-                >
-                  <button
-                    class="btn btn-light rounded-0 px-2"
-                    @click="updateQty(item, item.qty - 1)"
-                  >
-                    <i class="bi bi-dash"></i>
-                  </button>
-                  <input
-                    type="number"
-                    class="text-center border-0 px-2 fs-7 no-spinner"
-                    style="width: 40px"
-                    :value="item.qty"
-                    min="1"
-                    @change="updateQty(item, $event.target.value)"
-                  />
-                  <button
-                    class="btn btn-light rounded-0 px-2"
-                    @click="updateQty(item, item.qty + 1)"
-                  >
-                    <i class="bi bi-plus"></i>
-                  </button>
-                </div>
-              </div>
-
-              <!-- 價格 + 刪除 -->
-              <div class="d-flex align-items-center gap-3 ms-3">
-                <span class="fw-bold">${{ currency(item.total) }}</span>
-                <button
-                  class="btn-close"
-                  :disabled="loadingId === item.id"
-                  @click="removeItem(item)"
-                ></button>
-              </div>
-            </li>
-          </ul>
           <div class="col-12 col-lg-4">
             <div class="p-4 bg-light rounded-0">
               <h5 class="fw-bold mb-3">Order Summary</h5>
@@ -167,11 +113,12 @@
 <script>
 import TheHeader from "@/components/TheHeader.vue";
 import TheFooter from "@/components/TheFooter.vue";
+import CartItemList from "@/components/CartItemList.vue"; // ✅ 新增
 import { useCartStore } from "@/stores/cart";
 import { currency } from "@/methods/filters";
 
 export default {
-  components: { TheHeader, TheFooter },
+  components: { TheHeader, TheFooter, CartItemList }, // ✏️ 修改：加上 CartItemList
   setup() {
     const cartStore = useCartStore();
     cartStore.getCart();
@@ -182,7 +129,7 @@ export default {
       couponCode: "",
       couponMsg: "",
       couponSuccess: false,
-      loadingId: null,
+      // 🗑️ 刪除 loadingKey：移到 CartItemList 裡了
     };
   },
   watch: {
@@ -219,23 +166,13 @@ export default {
       localStorage.removeItem("couponCode");
       this.cartStore.finalTotal = this.cartStore.total;
     },
-    async updateQty(item, qty) {
-      const q = parseInt(qty);
-      if (!q || q < 1) return;
-      this.loadingId = item.id;
-      await this.cartStore.updateCart(item.id, q, item.product_id);
-      this.loadingId = null;
-    },
-    async removeItem(item) {
-      this.loadingId = item.id;
-      try {
-        await this.cartStore.removeCart(item.id);
-      } finally {
-        this.loadingId = null;
-      }
-    },
+    // 🗑️ 刪除 variantLabel、updateQty、removeItem：移到 CartItemList 裡了
   },
   computed: {
+    // 購物車總件數
+    totalQty() {
+      return this.cartStore.carts.reduce((sum, item) => sum + item.qty, 0);
+    },
     discountAmount() {
       return this.cartStore.total - this.cartStore.finalTotal;
     },

@@ -497,3 +497,108 @@ $area-img-width-xl: percentage(1 / 5); // = 25%
     }
   }
 }
+
+.search-btn,
+.search-btn:hover,
+.search-btn:focus,
+.search-btn:active {
+  background-color: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: inherit;
+}
+
+/* hover 時放大鏡變色，讓使用者知道可以點 */
+.search-btn:hover i {
+  color: var(--bs-primary);
+}
+
+/* 用鍵盤 Tab 切換時，保留清楚的焦點提示 */
+.search-btn:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+}
+
+/* 收藏按鈕：不要白底 */
+.btn-favorite {
+  width: auto;
+  height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  line-height: 1;
+  transition: transform 0.15s;
+}
+.btn-favorite:hover {
+  transform: scale(1.1);
+}
+
+/* 愛心：沒收藏是黑色空心，收藏後是紅色實心 */
+.heart-icon {
+  display: block;
+  font-size: 1.5rem;
+  color: #212529;
+}
+.heart-icon.is-active {
+  color: #e53935;
+}
+
+// 顏色色塊
+// 外框用 box-shadow，不會被 Bootstrap 的 button:focus 規則藏起來
+.color-swatch {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  transition: box-shadow 0.1s;
+
+  // 選中：白色間隔 + 黑色外圈
+  &.active {
+    box-shadow:
+      0 0 0 2px #fff,
+      0 0 0 4px #212529;
+  }
+
+  // 鍵盤 Tab 切換時的焦點提示
+  &:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px #fff,
+      0 0 0 4px var(--bs-primary);
+  }
+}
+
+// 尺寸按鈕
+.size-btn {
+  min-width: 3rem;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #ccc;
+  background: #fff;
+  color: #212529;
+  cursor: pointer;
+  transition: box-shadow 0.1s;
+
+  &:hover {
+    border-color: #212529;
+  }
+
+  // 選中：黑底白字 + 外圈黑框
+  &.active {
+    background: #212529;
+    border-color: #212529;
+    color: #fff;
+    box-shadow:
+      0 0 0 2px #fff,
+      0 0 0 4px #212529;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px #fff,
+      0 0 0 4px var(--bs-primary);
+  }
+}

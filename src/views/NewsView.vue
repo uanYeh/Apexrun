@@ -55,8 +55,6 @@
 </template>
 
 <script>
-import newsImg from "@/assets/images/newsImg.jpg";
-
 import TheHeader from "@/components/TheHeader.vue";
 import TheFooter from "@/components/TheFooter.vue";
 import TheBreadcrumb from "@/components/ui/TheBreadcrumb.vue";
@@ -72,7 +70,6 @@ export default {
   },
   data() {
     return {
-      newsImg,
       isLoading: false,
       allArticles: [],
       perPage: 6, //每頁幾筆
@@ -84,14 +81,21 @@ export default {
     getArticles() {
       const api = `${import.meta.env.VITE_APP_API}api/${import.meta.env.VITE_APP_PATH}/articles`;
       this.isLoading = true;
-      this.$http.get(api).then((res) => {
-        this.isLoading = false;
-        this.allArticles = res.data.articles;
-        console.log(res.data.articles);
-      });
+      this.$http
+        .get(api)
+        .then((res) => {
+          this.isLoading = false;
+          this.allArticles = res.data.articles;
+          console.log(res.data.articles);
+        })
+        .catch((err) => {
+          this.isLoading = false; // 失敗也要關閉 Loading
+          console.error("取得文章失敗：", err);
+        });
     },
     changePage(page) {
       this.currentPage = page;
+      window.scrollTo({ top: 0, behavior: "smooth" });
     },
   },
   computed: {

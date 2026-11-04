@@ -1,14 +1,16 @@
 <template>
+  <Loading :active="isLoading"></Loading>
   <TheHeader />
 
   <div class="container-xl py-3">
     <TheBreadcrumb />
     <main>
-      <div class="row mb-4">
+      <!-- ✏️ 修改：載入完成才顯示商品資訊 -->
+      <div v-if="!isLoading && product.id" class="row mb-4">
         <div class="col-12 col-md-6 col-lg-8">
           <div class="row g-2" id="product-gallery">
             <div class="col-12">
-              <img :src="product.imageUrl" class="product-img w-100" />
+              <img :src="product.imageUrl" :alt="product.title" class="product-img w-100" />
             </div>
           </div>
           <!-- <div class="row g-2">
@@ -67,25 +69,67 @@
           <!-- 評分 //隨機給，因為沒有api-->
           <p class="mb-2"><i class="bi bi-star-fill text-warning"></i> {{ rating }}</p>
 
-          <!-- 價格 -->
+          <!-- 價格：✏️ 修改，有折扣才顯示原價 -->
           <div class="mb-2 mb-lg-4">
             <span class="fs-2 fw-bold text-dark">${{ currency(product.price) }}</span>
-            <span class="text-muted text-decoration-line-through ms-2"
-              >${{ product.origin_price }}</span
+            <span
+              v-if="product.origin_price > product.price"
+              class="text-muted text-decoration-line-through ms-2"
+              >${{ currency(product.origin_price) }}</span
             >
           </div>
 
           <!-- 尺寸 沒有尺寸，先關閉-->
           <!-- <div class="mb-2 mb-lg-4">
+    <p class="mb-2">Size :</p>
+    <select class="form-select rounded-0" v-model="selectedSize">
+      <option value="">Please select your size.</option>
+      <option value="S">S</option>
+      <option value="M">M</option>
+      <option value="L">L</option>
+      <option value="XL">XL</option>
+    </select>
+  </div> -->
+
+          <!-- 顏色：商品有 colors 才顯示 -->
+          <div v-if="productColors.length" class="mb-3">
+            <p class="mb-2">
+              Color :
+              <span class="fw-semibold" :class="{ 'text-muted fw-normal': !selectedColor }">
+                {{ selectedColor || "Please select" }}
+              </span>
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+              <button
+                v-for="color in productColors"
+                :key="color.name"
+                type="button"
+                class="color-swatch"
+                :class="{ active: selectedColor === color.name }"
+                :style="{ backgroundColor: color.code }"
+                :title="color.name"
+                :aria-label="color.name"
+                @click="selectedColor = color.name"
+              ></button>
+            </div>
+          </div>
+
+          <!-- 尺寸：商品有 sizes 才顯示 -->
+          <div v-if="productSizes.length" class="mb-3">
             <p class="mb-2">Size :</p>
-            <select class="form-select rounded-0" v-model="selectedSize">
-              <option value="">Please select your size.</option>
-              <option value="S">S</option>
-              <option value="M">M</option>
-              <option value="L">L</option>
-              <option value="XL">XL</option>
-            </select>
-          </div> -->
+            <div class="d-flex flex-wrap gap-2">
+              <button
+                v-for="size in productSizes"
+                :key="size"
+                type="button"
+                class="size-btn"
+                :class="{ active: selectedSize === size }"
+                @click="selectedSize = size"
+              >
+                {{ size }}
+              </button>
+            </div>
+          </div>
 
           <!-- 數量 -->
           <div class="mb-4">
@@ -101,14 +145,17 @@
             </div>
           </div>
 
+          <!-- 沒選完的提醒 -->
+          <p v-if="optionError" class="text-danger fs-6 mb-2">{{ optionError }}</p>
+
           <!-- 加入購物車 -->
           <button
             class="btn w-100 rounded-0 py-3 fw-bold bg-primary text-white"
             @click="addCart(product.id)"
-            :disabled="status.LoadingItem == product.id && status.LoadingItem !== ''"
+            :disabled="cartStore.loadingItem === product.id"
           >
             <span
-              v-if="status.LoadingItem == product.id && status.LoadingItem !== ''"
+              v-if="cartStore.loadingItem === product.id"
               class="spinner-border spinner-border-sm text-white me-2"
               role="status"
             ></span>
@@ -116,6 +163,34 @@
           </button>
         </div>
       </div>
+
+      <!-- ✅ 新增：載入中的骨架畫面 -->
+      <div v-else class="row mb-4 placeholder-wave" aria-hidden="true">
+        <div class="col-12 col-md-6 col-lg-8">
+          <div class="placeholder w-100 product-img"></div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4">
+          <span class="placeholder col-3 mb-3"></span>
+          <h3><span class="placeholder col-10"></span></h3>
+          <p>
+            <span class="placeholder col-12"></span>
+            <span class="placeholder col-8"></span>
+          </p>
+          <p><span class="placeholder col-2"></span></p>
+          <h2 class="mb-4"><span class="placeholder col-4"></span></h2>
+          <p><span class="placeholder col-3"></span></p>
+          <div class="d-flex gap-2 mb-4">
+            <span class="placeholder" style="width: 3rem; height: 2.25rem"></span>
+            <span class="placeholder" style="width: 3rem; height: 2.25rem"></span>
+            <span class="placeholder" style="width: 3rem; height: 2.25rem"></span>
+            <span class="placeholder" style="width: 3rem; height: 2.25rem"></span>
+          </div>
+          <p><span class="placeholder col-3"></span></p>
+          <span class="placeholder col-4 mb-4" style="height: 2.5rem"></span>
+          <span class="placeholder w-100" style="height: 3.5rem"></span>
+        </div>
+      </div>
+
       <div>
         <!-- 頁籤 -->
         <ul
@@ -200,28 +275,29 @@
   <TheFooter />
 </template>
 <script>
+// ===== Swiper =====
 import { Swiper, SwiperSlide } from "swiper/vue";
-import { Navigation } from "swiper/modules";
-// 移除
-// import GLightbox from "glightbox";
-// import "glightbox/dist/css/glightbox.css";
+import "swiper/css";
+
+// ===== 圖片放大 =====
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import "photoswipe/style.css";
 
-import TheHeader from "@/components/TheHeader.vue";
-import TheFooter from "@/components/TheFooter.vue";
-import TheBreadcrumb from "@/components/ui/TheBreadcrumb.vue";
-import ProductCard from "@/components/ProductCard.vue";
-import { currency } from "@/methods/filters";
-import SizeGuideTab from "@/components/ui/SizeGuideTab.vue";
-import ProductInfoTabs from "@/components/ui/ProductInfoTabs.vue";
+// ===== 購物車 =====
 import { useCartStore } from "@/stores/cart";
 import { Offcanvas } from "bootstrap";
 
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
-import "swiper/css/autoplay";
+// ===== 元件 =====
+import TheHeader from "@/components/TheHeader.vue";
+import TheFooter from "@/components/TheFooter.vue";
+import ProductCard from "@/components/ProductCard.vue";
+import TheBreadcrumb from "@/components/ui/TheBreadcrumb.vue";
+import SizeGuideTab from "@/components/ui/SizeGuideTab.vue";
+import ProductInfoTabs from "@/components/ui/ProductInfoTabs.vue";
+
+// ===== 工具函式與設定 =====
+import { currency } from "@/methods/filters";
+import { productOptions } from "@/config/swiperOptions";
 
 export default {
   setup() {
@@ -240,9 +316,12 @@ export default {
   },
   data() {
     return {
+      isLoading: false,
       product: {},
       photos: [], // 圖片 gallery 用
       selectedSize: "",
+      selectedColor: "", // ✅ 新增：選擇的顏色
+      optionError: "", // ✅ 新增：沒選完的提醒文字
       qty: 1,
       lightbox: null,
       recentProducts: [], //recent
@@ -250,23 +329,7 @@ export default {
       status: {
         LoadingItem: "",
       },
-      swiperOptions: {
-        modules: [Navigation],
-        navigation: false,
-        slidesPerView: 2.1,
-        spaceBetween: 8,
-        centeredSlidesBounds: true,
-        slidesOffsetBefore: -270,
-        loop: true,
-        rating: (Math.random() * (5 - 4.2) + 4.2).toFixed(1),
-        breakpoints: {
-          375: { slidesPerView: 2.3, slidesOffsetBefore: 0, spaceBetween: 8 },
-          576: { slidesPerView: 2.3, slidesOffsetBefore: 0, spaceBetween: 16 },
-          768: { slidesPerView: 3.5, slidesOffsetBefore: 0, spaceBetween: 16 },
-          992: { slidesPerView: 3.5, slidesOffsetBefore: 0, spaceBetween: 16 },
-          1200: { slidesPerView: 5.5, slidesOffsetBefore: -122, spaceBetween: 16 },
-        },
-      },
+      swiperOptions: productOptions,
     };
   },
   mounted() {
@@ -300,12 +363,21 @@ export default {
     getProduct() {
       const id = this.$route.params.id;
       const api = `${import.meta.env.VITE_APP_API}api/${import.meta.env.VITE_APP_PATH}/product/${id}`;
-      this.$http.get(api).then((res) => {
-        // console.log("res:", res.data);
-        this.product = res.data.product;
-        this.saveToRecent(id);
-        this.getRelated();
-      });
+      this.isLoading = true;
+      this.$http
+        .get(api)
+        .then((res) => {
+          this.isLoading = false;
+          // console.log("res:", res.data);
+          this.product = res.data.product;
+          this.saveToRecent(id);
+          this.getRelated();
+        })
+        .catch((err) => {
+          this.isLoading = false; // 失敗：也要關閉 Loading
+          console.error("取得商品失敗：", err);
+          this.$router.push("/products");
+        });
     },
     // addCart(id) {
     //   this.status.LoadingItem = id;
@@ -323,8 +395,27 @@ export default {
     //   });
     // },
     addCart(id) {
+      // ✅ 新增：是不是目前頁面的商品（下方輪播的卡片不是）
+      const isCurrent = id === this.product.id;
+
+      // ✅ 新增：目前頁面的商品，有顏色或尺寸就要選完才能加入
+      if (isCurrent) {
+        if (this.productColors.length && !this.selectedColor) {
+          this.optionError = "Please select a color.";
+          return;
+        }
+        if (this.productSizes.length && !this.selectedSize) {
+          this.optionError = "Please select a size.";
+          return;
+        }
+      }
+
+      // ✏️ 修改：目前商品用選的數量，下方卡片固定 1 件
+      const qty = isCurrent ? this.qty : 1;
+
       this.status.LoadingItem = id;
-      this.cartStore.addCart(id, this.qty).then(() => {
+      const options = isCurrent ? { size: this.selectedSize, color: this.selectedColor } : {};
+      this.cartStore.addCart(id, qty, options).then(() => {
         this.status.LoadingItem = "";
         const el = document.getElementById("CartOffcanvas");
         const offcanvas = Offcanvas.getOrCreateInstance(el);
@@ -369,11 +460,33 @@ export default {
       const seed = this.product.id ? this.product.id.charCodeAt(0) : 0;
       return (4.5 + (seed % 9) * 0.1).toFixed(1);
     },
+    // ✅ 新增：這個商品可選的尺寸（沒有就是空陣列）
+    productSizes() {
+      return Array.isArray(this.product.sizes) ? this.product.sizes : [];
+    },
+    // ✅ 新增：這個商品可選的顏色（沒有就是空陣列）
+    productColors() {
+      return Array.isArray(this.product.colors) ? this.product.colors : [];
+    },
   },
   watch: {
     "$route.params.id"() {
+      this.qty = 1; // ✅ 新增：換商品時數量回到 1
       this.getProduct();
       this.getRecentProducts();
+    },
+    // ✅ 新增：商品載入後清空選擇，只有一個選項時自動選好（例如帽子只有 F）
+    product() {
+      this.selectedSize = this.productSizes.length === 1 ? this.productSizes[0] : "";
+      this.selectedColor = this.productColors.length === 1 ? this.productColors[0].name : "";
+      this.optionError = "";
+    },
+    // ✅ 新增：選了之後，紅字提醒就消失
+    selectedSize() {
+      this.optionError = "";
+    },
+    selectedColor() {
+      this.optionError = "";
     },
   },
   created() {

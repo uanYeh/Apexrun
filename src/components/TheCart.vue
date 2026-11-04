@@ -7,9 +7,7 @@
     ref="cartOffcanvas"
   >
     <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="CartOffcanvasLabel">
-        Cart ({{ cartStore.carts.length }} items)
-      </h5>
+      <h5 class="offcanvas-title" id="CartOffcanvasLabel">Cart ({{ totalQty }} items)</h5>
       <button
         type="button"
         class="btn-close"
@@ -29,6 +27,9 @@
         <img :src="cartStore.lastAdded.imageUrl" class="cart-item-img" />
         <div class="flex-grow-1 overflow-hidden">
           <p class="fw-bold mb-1 cart-item-title">{{ cartStore.lastAdded.title }}</p>
+          <p v-if="variantLabel(cartStore.lastAdded)" class="mb-0 fs-7 text-muted">
+            {{ variantLabel(cartStore.lastAdded) }}
+          </p>
           <p class="mb-0 fs-7 text-muted">qty: {{ cartStore.lastAdded.qty }}</p>
         </div>
         <span class="fw-bold">${{ currency(cartStore.lastAdded.total) }}</span>
@@ -42,63 +43,8 @@
         <p class="mt-2">Your cart is empty</p>
       </div>
 
-      <!-- 購物車列表 -->
-      <ul v-else class="list-unstyled flex-grow-1 overflow-y-auto">
-        <li
-          class="cart-item d-flex align-items-center py-3 border-bottom"
-          v-for="item in cartStore.carts"
-          :key="item.id"
-        >
-          <!-- 圖片 -->
-          <img :src="item.product.imageUrl" :alt="item.product.title" class="cart-item-img me-3" />
-
-          <!-- 商品資訊 -->
-          <div class="flex-grow-1">
-            <p class="fw-bold mb-1 cart-item-title me-2">{{ item.product.title }}</p>
-
-            <!-- 數量控制 -->
-            <div class="d-flex">
-              <div>qty：</div>
-              <div
-                class="d-flex border"
-                style="height: 28px"
-                :style="loadingId === item.id ? 'pointer-events: none; opacity: 0.5' : ''"
-              >
-                <button
-                  class="btn btn-light rounded-0 px-1 py-0"
-                  @click="updateQty(item, item.qty - 1)"
-                >
-                  <i class="bi bi-dash fs-7"></i>
-                </button>
-                <input
-                  type="number"
-                  class="text-center border-0 px-2 fs-7 no-spinner"
-                  style="width: 40px"
-                  :value="item.qty"
-                  min="1"
-                  @change="updateQty(item, $event.target.value)"
-                />
-                <button
-                  class="btn btn-light rounded-0 px-1 py-0"
-                  @click="updateQty(item, item.qty + 1)"
-                >
-                  <i class="bi bi-plus fs-7"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- 價格 + 刪除 -->
-          <div class="d-flex align-items-center gap-2 ms-3">
-            <span class="fw-bold">${{ currency(item.total) }}</span>
-            <button
-              class="btn-close me-2"
-              :disabled="loadingId === item.id"
-              @click="removeItem(item)"
-            ></button>
-          </div>
-        </li>
-      </ul>
+      <!-- ✏️ 修改：改用共用的購物車列表（小尺寸） -->
+      <CartItemList v-else size="sm" class="flex-grow-1 overflow-y-auto" />
 
       <!-- 總計 + 按鈕 -->
       <div v-if="cartStore.carts.length > 0" class="mt-auto flex-shrink-0">
@@ -126,40 +72,30 @@
 </template>
 
 <script>
+import CartItemList from "@/components/CartItemList.vue"; // ✅ 新增
 import { useCartStore } from "@/stores/cart";
 import { currency } from "@/methods/filters";
 
 export default {
+  components: { CartItemList }, // ✅ 新增
   setup() {
     const cartStore = useCartStore();
     cartStore.getCart();
     return { cartStore };
   },
-  data() {
-    return {
-      loadingId: null, // 正在更新/刪除的購物車項目 id
-    };
+  computed: {
+    // 購物車總件數
+    totalQty() {
+      return this.cartStore.carts.reduce((sum, item) => sum + item.qty, 0);
+    },
   },
   methods: {
     currency,
-    async updateQty(item, qty) {
-      const q = parseInt(qty);
-      if (!q || q < 1) return;
-      this.loadingId = item.id;
-      try {
-        await this.cartStore.updateCart(item.id, q, item.product_id);
-      } finally {
-        this.loadingId = null;
-      }
+    // 規格文字（Just added 提示用）
+    variantLabel(v) {
+      return [v.color, v.size].filter(Boolean).join(" / ");
     },
-    async removeItem(item) {
-      this.loadingId = item.id;
-      try {
-        await this.cartStore.removeCart(item.id);
-      } finally {
-        this.loadingId = null;
-      }
-    },
+    // 🗑️ 刪除 updateQty、removeItem：移到 CartItemList 裡了
   },
   mounted() {
     this.$refs.cartOffcanvas.addEventListener("hidden.bs.offcanvas", () => {

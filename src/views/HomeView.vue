@@ -20,10 +20,12 @@
               <p class="text-light fs-6 fs-md-5 content-truncate fw-light">
                 Professional running gear, made to help you push your limits with every step.
               </p>
-              <a
+              <RouterLink
+                to="/products"
                 class="btn btn-warning rounded-0 align-self-start py-1 py-md-2 px-4 px-md-6 fs-6 fs-md-5"
-                >Shop Now</a
               >
+                Shop Now
+              </RouterLink>
             </div>
           </div>
           <div class="col-md-6"></div>
@@ -177,7 +179,7 @@
         <div class="newproduct-content">
           <Swiper v-bind="swiper2Options">
             <SwiperSlide v-for="item in newProducts" :key="item.id">
-              <ProductCard :product="item" />
+              <ProductCard :product="item" @add-cart="addCart" />
             </SwiperSlide>
           </Swiper>
         </div>
@@ -189,7 +191,7 @@
       <h2 class="text-center mb-4 mb-lg-5 fw-bold">Most Popular</h2>
       <Swiper v-bind="swiperOptions">
         <SwiperSlide v-for="item in popularProducts" :key="item.id">
-          <ProductCard :product="item" />
+          <ProductCard :product="item" @add-cart="addCart" />
         </SwiperSlide>
       </Swiper>
     </div>
@@ -265,7 +267,12 @@
             <h2 class="text-light fw-medium mb-4 fs-1 text-end">
               A New Perspective On Performance Apparel™
             </h2>
-            <a class="btn btn-primary rounded-0 align-self-end py-2 px-6 fs-5">Shop Now</a>
+            <RouterLink
+              to="/products"
+              class="btn btn-primary rounded-0 align-self-end py-2 px-6 fs-5"
+            >
+              Shop Now
+            </RouterLink>
           </div>
         </div>
       </div>
