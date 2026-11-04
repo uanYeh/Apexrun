@@ -56,3 +56,11 @@ export const featureOptions = {
     1200: { slidesPerView: 3 },
   },
 };
+
+// 商品詳情頁：手機版圖片左右滑動，下方顯示「1 / 8」
+export const galleryOptions = {
+  modules: [Pagination],
+  slidesPerView: 1,
+  spaceBetween: 8,
+  pagination: { type: "fraction" },
+};

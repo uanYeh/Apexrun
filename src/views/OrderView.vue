@@ -62,31 +62,46 @@
 
           <hr />
 
-          <!-- Product Details -->
+          <!-- Product Details：✏️ 修改，每個規格一行 -->
           <h4 class="fw-bold mb-3">Product Details</h4>
 
           <div class="row flex-column">
             <ul class="col-12 list-unstyled">
               <li
+                v-for="line in orderLines"
+                :key="line.key"
                 class="cart-item d-flex align-items-center py-2 border-bottom"
-                v-for="item in Object.values(order.products)"
-                :key="item.id"
               >
                 <img
-                  :src="item.product.imageUrl"
-                  :alt="item.product.title"
+                  :src="line.product.imageUrl"
+                  :alt="line.product.title"
                   class="cart-item-img me-3"
                 />
                 <div class="flex-grow-1">
-                  <p class="fw-bold mb-1 cart-item-title me-2">{{ item.product.title }}</p>
-                  <p class="text-muted small mb-1">Qty：{{ item.qty }}</p>
+                  <p class="fw-bold mb-1 cart-item-title me-2">{{ line.product.title }}</p>
+                  <p v-if="line.label" class="text-muted small mb-1">{{ line.label }}</p>
+                  <p class="text-muted small mb-1">Qty：{{ line.qty }}</p>
                 </div>
                 <div class="d-flex align-items-center gap-3 ms-3">
-                  <span class="fw-bold">${{ currency(item.total) }}</span>
+                  <span class="fw-bold">${{ currency(line.product.price * line.qty) }}</span>
                 </div>
               </li>
             </ul>
           </div>
+
+          <!-- ✅ 新增：小計、折扣 -->
+          <div class="d-flex justify-content-between mb-2">
+            <span>Subtotal</span>
+            <span>${{ currency(subtotal) }}</span>
+          </div>
+          <div v-if="discountAmount > 0" class="d-flex justify-content-between mb-2">
+            <span>
+              Discount
+              <span v-if="couponCode" class="text-muted">({{ couponCode }})</span>
+            </span>
+            <span class="text-success">-${{ currency(discountAmount) }}</span>
+          </div>
+          <hr />
 
           <!-- Order Total -->
           <div class="d-flex justify-content-between align-items-center">
@@ -112,6 +127,40 @@ export default {
     return {
       order: null,
     };
+  },
+  computed: {
+    // ✅ 新增：訂單裡的商品（API 回傳的是物件，轉成陣列）
+    orderItems() {
+      return this.order ? Object.values(this.order.products || {}) : [];
+    },
+    // ✅ 新增：依規格拆成多行；舊訂單沒有規格的話，就是一行
+    orderLines() {
+      return this.orderItems.flatMap((item) => {
+        const variants =
+          Array.isArray(item.variants) && item.variants.length
+            ? item.variants
+            : [{ size: "", color: "", qty: item.qty }];
+        return variants.map((v, index) => ({
+          key: `${item.id}-${index}`,
+          product: item.product,
+          qty: v.qty,
+          label: [v.color, v.size].filter(Boolean).join(" / "),
+        }));
+      });
+    },
+    // ✅ 新增：折扣前的小計
+    subtotal() {
+      return this.orderItems.reduce((sum, item) => sum + item.product.price * item.qty, 0);
+    },
+    // ✅ 新增：折扣金額，四捨五入避免小數點
+    discountAmount() {
+      return Math.round(this.subtotal - this.order.total);
+    },
+    // ✅ 新增：用了哪一組折扣碼
+    couponCode() {
+      const item = this.orderItems.find((i) => i.coupon && i.coupon.code);
+      return item ? item.coupon.code : "";
+    },
   },
   methods: {
     currency,

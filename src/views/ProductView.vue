@@ -4,8 +4,10 @@
   <div class="container-xl py-3">
     <TheBreadcrumb />
     <div v-if="currentCategory" class="border p-4 mb-4 mx-0 mx-lg-2">
-      <h3 class="fw-bold">{{ currentCategory.title }}</h3>
-      <p class="fs-6">{{ currentCategory.desc }}</p>
+      <h3 class="fw-bold" :class="{ 'mb-0': !currentCategory.desc }">
+        {{ currentCategory.title }}
+      </h3>
+      <p v-if="currentCategory.desc" class="fs-6 mb-0">{{ currentCategory.desc }}</p>
     </div>
 
     <!-- 搜尋結果提示 -->
@@ -97,34 +99,11 @@ export default {
       sortBy: "",
       perPage: 16, //一頁幾筆
       currentPage: 1,
-      categoryDesc: [
-        //無api 只好寫死分類跟說明
-        {
-          category: "",
-          title: "ALL",
-          desc: "Discover performance gear built for every sport. APEXRUN brings you premium running shoes, apparel, and accessories — designed to keep you moving further, faster, and stronger.",
-        },
-        {
-          category: "Bags",
-          title: "BAGS",
-          desc: "Carry your essentials with ease. Our backpacks and waist bags are built for athletes who need storage without the bulk.",
-        },
-        {
-          category: "Apparel",
-          title: "APPAREL",
-          desc: "Train in comfort and style. Our technical apparel is crafted to move with your body — breathable, lightweight, and built for performance.",
-        },
-        {
-          category: "Equipment",
-          title: "EQUIPMENT",
-          desc: "Protect your body and track your performance. APEXRUN equipment — from knee sleeves to timers — gives you the edge you need.",
-        },
-        {
-          category: "Accessories",
-          title: "ACCESSORIES",
-          desc: "From hats and gloves to socks, our accessories are designed to keep you focused on the run — no matter the weather.",
-        },
-      ],
+      // ALL 的說明維持寫死，其他分類的說明改從後台設定（存在商品資料裡）
+      allCategoryDesc: {
+        title: "ALL",
+        desc: "Discover performance gear built for every sport. APEXRUN brings you premium running shoes, apparel, and accessories — designed to keep you moving further, faster, and stronger.",
+      },
     };
   },
   methods: {
@@ -195,10 +174,17 @@ export default {
       const start = (this.currentPage - 1) * this.perPage;
       return this.sortedProducts.slice(start, start + this.perPage);
     },
-    //這是分類說明(沒有api 所以寫死的方式)
+    // 分類說明：ALL 用寫死的，其他分類從該分類的商品讀取後台設定的說明
     currentCategory() {
       if (this.$route.query.search) return null; // 搜尋時不顯示分類說明
-      return this.categoryDesc.find((item) => item.category === (this.$route.query.category || ""));
+      const category = this.$route.query.category;
+      if (!category) return this.allCategoryDesc;
+
+      const product = this.allProducts.find((p) => p.category === category);
+      return {
+        title: category.toUpperCase(),
+        desc: product?.categoryDesc || "",
+      };
     },
   },
   setup() {

@@ -241,10 +241,11 @@
                 v-if="cartStore.total !== cartStore.finalTotal"
                 class="d-flex justify-content-between mb-3"
               >
-                <span class="fw-bold">Discount</span>
-                <span class="text-success"
-                  >-${{ currency(cartStore.total - cartStore.finalTotal) }}</span
-                >
+                <span class="fw-bold">
+                  Discount
+                  <span v-if="couponCode" class="fw-normal text-muted">({{ couponCode }})</span>
+                </span>
+                <span class="text-success">-${{ currency(discountAmount) }}</span>
               </div>
 
               <hr />
@@ -301,6 +302,7 @@ export default {
     return {
       isLoading: false,
       isOpen: false,
+      couponCode: localStorage.getItem("couponCode") || "",
       form: {
         email: "",
         firstName: "",
@@ -335,7 +337,8 @@ export default {
             return `${item.product.title}${label ? ` - ${label}` : ""} × ${v.qty}`;
           }),
         )
-        .join("、");
+        .join("、")
+        .concat(this.couponCode ? `｜Coupon: ${this.couponCode}` : "");
 
       this.isLoading = true;
       try {
@@ -346,7 +349,10 @@ export default {
         if (!orderRes.data.success) return;
 
         const orderId = orderRes.data.orderId;
-
+        // ✅ 新增：下單成功後，伺服器已經清空購物車，前台重新讀取一次
+        await this.cartStore.getCart();
+        // ✅ 新增：優惠碼已經用掉了，一起清掉
+        localStorage.removeItem("couponCode");
         const payRes = await axios.post(
           `${import.meta.env.VITE_APP_API}api/${import.meta.env.VITE_APP_PATH}/pay/${orderId}`,
         );
@@ -367,6 +373,9 @@ export default {
     // 購物車總件數
     totalQty() {
       return this.cartStore.carts.reduce((sum, item) => sum + item.qty, 0);
+    },
+    discountAmount() {
+      return Math.round(this.cartStore.total - this.cartStore.finalTotal);
     },
   },
 };

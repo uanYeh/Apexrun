@@ -8,9 +8,46 @@
       <!-- ✏️ 修改：載入完成才顯示商品資訊 -->
       <div v-if="!isLoading && product.id" class="row mb-4">
         <div class="col-12 col-md-6 col-lg-8">
-          <div class="row g-2" id="product-gallery">
-            <div class="col-12">
-              <img :src="product.imageUrl" :alt="product.title" class="product-img w-100" />
+          <!-- 手機、平板：左右滑動 -->
+          <div class="d-lg-none">
+            <Swiper v-bind="galleryOptions" class="product-gallery-swiper">
+              <SwiperSlide v-for="(url, index) in photos" :key="url">
+                <img
+                  :src="url"
+                  :alt="`${product.title} ${index + 1}`"
+                  class="product-img w-100"
+                  style="cursor: zoom-in"
+                  @click="openLightboxAt(index)"
+                />
+              </SwiperSlide>
+            </Swiper>
+          </div>
+
+          <!-- 桌機：2 × 2，超過 4 張時第 4 格顯示「+N」 -->
+          <div class="row g-2 d-none d-lg-flex">
+            <div
+              v-for="(url, index) in visiblePhotos"
+              :key="url"
+              :class="photos.length === 1 ? 'col-12' : 'col-6'"
+            >
+              <img
+                :src="url"
+                :alt="`${product.title} ${index + 1}`"
+                class="product-img w-100"
+                style="cursor: zoom-in"
+                @click="openLightboxAt(index)"
+              />
+            </div>
+            <div v-if="photos.length > 4" class="col-6">
+              <button
+                type="button"
+                class="photo-more"
+                :aria-label="`View all ${photos.length} photos`"
+                @click="openLightboxAt(3)"
+              >
+                <img :src="photos[3]" alt="" class="product-img w-100" />
+                <span class="photo-more-overlay">+{{ photos.length - 3 }}</span>
+              </button>
             </div>
           </div>
           <!-- <div class="row g-2">
@@ -167,7 +204,14 @@
       <!-- ✅ 新增：載入中的骨架畫面 -->
       <div v-else class="row mb-4 placeholder-wave" aria-hidden="true">
         <div class="col-12 col-md-6 col-lg-8">
-          <div class="placeholder w-100 product-img"></div>
+          <!-- 手機、平板：一張 -->
+          <div class="placeholder w-100 product-img d-lg-none"></div>
+          <!-- 桌機：2 × 2 -->
+          <div class="row g-2 d-none d-lg-flex">
+            <div v-for="n in 4" :key="n" class="col-6">
+              <div class="placeholder w-100 product-img"></div>
+            </div>
+          </div>
         </div>
         <div class="col-12 col-md-6 col-lg-4">
           <span class="placeholder col-3 mb-3"></span>
@@ -243,11 +287,15 @@
           </div>
           <div class="tab-pane fade" id="size" role="tabpanel">
             <h5 class="fw-bold mb-3">Size & Fit</h5>
-            <SizeGuideTab :category="product.category" />
+            <div v-if="product.sizeFit" class="text-muted" v-html="product.sizeFit"></div>
+            <p v-else class="text-muted mb-0">No size & fit information available.</p>
           </div>
           <div class="tab-pane fade" id="material" role="tabpanel">
             <h5 class="fw-bold mb-3">Material / Composition</h5>
-            <ProductInfoTabs :category="product.category" tab="material" />
+            <p v-if="product.material" class="text-muted mb-0" style="white-space: pre-line">
+              {{ product.material }}
+            </p>
+            <p v-else class="text-muted mb-0">No material information available.</p>
           </div>
         </div>
 
@@ -278,6 +326,7 @@
 // ===== Swiper =====
 import { Swiper, SwiperSlide } from "swiper/vue";
 import "swiper/css";
+import "swiper/css/pagination"; // ✅ 新增：手機圖片輪播的「1 / 8」頁數樣式
 
 // ===== 圖片放大 =====
 import PhotoSwipeLightbox from "photoswipe/lightbox";
@@ -292,12 +341,10 @@ import TheHeader from "@/components/TheHeader.vue";
 import TheFooter from "@/components/TheFooter.vue";
 import ProductCard from "@/components/ProductCard.vue";
 import TheBreadcrumb from "@/components/ui/TheBreadcrumb.vue";
-import SizeGuideTab from "@/components/ui/SizeGuideTab.vue";
-import ProductInfoTabs from "@/components/ui/ProductInfoTabs.vue";
 
 // ===== 工具函式與設定 =====
 import { currency } from "@/methods/filters";
-import { productOptions } from "@/config/swiperOptions";
+import { productOptions, galleryOptions } from "@/config/swiperOptions"; // ✏️ 修改：加上 galleryOptions
 
 export default {
   setup() {
@@ -311,52 +358,36 @@ export default {
     ProductCard,
     Swiper,
     SwiperSlide,
-    SizeGuideTab,
-    ProductInfoTabs,
   },
   data() {
     return {
       isLoading: false,
       product: {},
-      photos: [], // 圖片 gallery 用
       selectedSize: "",
-      selectedColor: "", // ✅ 新增：選擇的顏色
-      optionError: "", // ✅ 新增：沒選完的提醒文字
+      selectedColor: "", // 選擇的顏色
+      optionError: "", // 沒選完的提醒文字
       qty: 1,
       lightbox: null,
+      photoSizes: {}, // ✅ 新增：每張圖片的實際寬高，燈箱需要
       recentProducts: [], //recent
       mightLikeProducts: [], //might like
       status: {
         LoadingItem: "",
       },
       swiperOptions: productOptions,
+      galleryOptions, // ✅ 新增：手機圖片輪播設定
     };
   },
   mounted() {
-    this.$nextTick(() => {
-      const lightbox = new PhotoSwipeLightbox({
-        gallery: "#product-gallery",
-        children: "a.pswp-item",
-        pswpModule: () => import("photoswipe"),
-      });
-
-      lightbox.on("contentLoad", (e) => {
-        const { content } = e;
-        if (content.type === "image") {
-          e.preventDefault();
-          const img = new Image();
-          img.src = content.data.src;
-          img.onload = () => {
-            content.data.w = img.naturalWidth;
-            content.data.h = img.naturalHeight;
-            content.onLoaded();
-          };
-        }
-      });
-
-      lightbox.init();
-      this.lightbox = lightbox;
+    // ✏️ 修改：建立燈箱，圖片清單在點擊時才交給它
+    this.lightbox = new PhotoSwipeLightbox({
+      pswpModule: () => import("photoswipe"),
     });
+    this.lightbox.init();
+  },
+  // ✅ 新增：離開頁面時清掉燈箱
+  beforeUnmount() {
+    if (this.lightbox) this.lightbox.destroy();
   },
   methods: {
     currency,
@@ -370,6 +401,7 @@ export default {
           this.isLoading = false;
           // console.log("res:", res.data);
           this.product = res.data.product;
+          this.$nextTick(() => this.loadPhotoSizes()); // ✅ 新增：先讀出圖片尺寸
           this.saveToRecent(id);
           this.getRelated();
         })
@@ -395,10 +427,10 @@ export default {
     //   });
     // },
     addCart(id) {
-      // ✅ 新增：是不是目前頁面的商品（下方輪播的卡片不是）
+      // 是不是目前頁面的商品（下方輪播的卡片不是）
       const isCurrent = id === this.product.id;
 
-      // ✅ 新增：目前頁面的商品，有顏色或尺寸就要選完才能加入
+      // 目前頁面的商品，有顏色或尺寸就要選完才能加入
       if (isCurrent) {
         if (this.productColors.length && !this.selectedColor) {
           this.optionError = "Please select a color.";
@@ -410,7 +442,7 @@ export default {
         }
       }
 
-      // ✏️ 修改：目前商品用選的數量，下方卡片固定 1 件
+      // 目前商品用選的數量，下方卡片固定 1 件
       const qty = isCurrent ? this.qty : 1;
 
       this.status.LoadingItem = id;
@@ -449,10 +481,26 @@ export default {
         this.recentProducts = ids.map((id) => all.find((p) => p.id === id)).filter(Boolean);
       });
     },
+    // ✅ 新增：先讀出每張圖片的實際尺寸，燈箱才能顯示正確的比例
+    loadPhotoSizes() {
+      this.photos.forEach((url) => {
+        if (this.photoSizes[url]) return;
+        const img = new Image();
+        img.onload = () => {
+          this.photoSizes[url] = { width: img.naturalWidth, height: img.naturalHeight };
+        };
+        img.src = url;
+      });
+    },
+    // ✏️ 修改：點第幾張圖，燈箱就從第幾張開始（可以左右滑看全部）
     openLightboxAt(index) {
-      if (this.lightbox) {
-        this.lightbox.loadAndOpen(index);
-      }
+      if (!this.lightbox) return;
+      const dataSource = this.photos.map((src) => ({
+        src,
+        width: this.photoSizes[src]?.width || 1200,
+        height: this.photoSizes[src]?.height || 1200,
+      }));
+      this.lightbox.loadAndOpen(index, dataSource);
     },
   },
   computed: {
@@ -460,28 +508,37 @@ export default {
       const seed = this.product.id ? this.product.id.charCodeAt(0) : 0;
       return (4.5 + (seed % 9) * 0.1).toFixed(1);
     },
-    // ✅ 新增：這個商品可選的尺寸（沒有就是空陣列）
+    // 這個商品可選的尺寸（沒有就是空陣列）
     productSizes() {
       return Array.isArray(this.product.sizes) ? this.product.sizes : [];
     },
-    // ✅ 新增：這個商品可選的顏色（沒有就是空陣列）
+    // 這個商品可選的顏色（沒有就是空陣列）
     productColors() {
       return Array.isArray(this.product.colors) ? this.product.colors : [];
+    },
+    // ✅ 新增：所有圖片，主圖排第一張
+    photos() {
+      const extra = Array.isArray(this.product.imagesUrl) ? this.product.imagesUrl : [];
+      return [...new Set([this.product.imageUrl, ...extra].filter(Boolean))];
+    },
+    // ✅ 新增：桌機要顯示的圖片，超過 4 張就只顯示 3 張，第 4 格放「+N」
+    visiblePhotos() {
+      return this.photos.length > 4 ? this.photos.slice(0, 3) : this.photos;
     },
   },
   watch: {
     "$route.params.id"() {
-      this.qty = 1; // ✅ 新增：換商品時數量回到 1
+      this.qty = 1; // 換商品時數量回到 1
       this.getProduct();
       this.getRecentProducts();
     },
-    // ✅ 新增：商品載入後清空選擇，只有一個選項時自動選好（例如帽子只有 F）
+    // 商品載入後清空選擇，只有一個選項時自動選好
     product() {
       this.selectedSize = this.productSizes.length === 1 ? this.productSizes[0] : "";
       this.selectedColor = this.productColors.length === 1 ? this.productColors[0].name : "";
       this.optionError = "";
     },
-    // ✅ 新增：選了之後，紅字提醒就消失
+    // 選了之後，紅字提醒就消失
     selectedSize() {
       this.optionError = "";
     },
