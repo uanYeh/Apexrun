@@ -52,7 +52,15 @@
         >、
         <a href="https://photoswipe.com/" target="_blank" class="text-decoration-none link-light"
           >PhotoSwipe</a
+        >、AI、
+        <a
+          href="https://uanyeh.github.io/apexrun-admin/#/login"
+          target="_blank"
+          class="text-decoration-none fw-semibold"
+          style="color: #ffd700"
         >
+          後台管理
+        </a>
       </p>
     </div>
   </footer>
