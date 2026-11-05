@@ -37,21 +37,26 @@
 
 <script>
 export default {
+  props: {
+    productTitle: {
+      type: String,
+      default: "",
+    },
+  },
   computed: {
     crumbs() {
       const route = this.$route;
       const crumbs = [];
 
-      if (route.name === "products") {
+      if (route.name === "Products") {
         crumbs.push({ label: "Products", to: "/products" });
         if (route.query.category) {
           crumbs.push({ label: route.query.category, to: null });
         }
-      } else if (route.name === "product") {
+      } else if (route.name === "Product") {
         crumbs.push({ label: "Products", to: "/products" });
-        crumbs.push({ label: route.params.id, to: null });
+        crumbs.push({ label: this.productTitle || route.params.id, to: null });
       } else {
-        // 其他頁面用 route.name 自動產生
         crumbs.push({ label: route.name, to: null });
       }
 

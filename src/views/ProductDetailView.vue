@@ -3,7 +3,7 @@
   <TheHeader />
 
   <div class="container-xl py-3">
-    <TheBreadcrumb />
+    <TheBreadcrumb :product-title="product.title" />
     <main>
       <!-- ✏️ 修改：載入完成才顯示商品資訊 -->
       <div v-if="!isLoading && product.id" class="row mb-4">
