@@ -636,3 +636,16 @@ $area-img-width-xl: percentage(1 / 5); // = 25%
     font-size: 0.75rem;
   }
 }
+// 文章文字倍數（A- / A / A+）
+.article-zoom-90 {
+  zoom: 0.9;
+}
+.article-zoom-100 {
+  zoom: 1;
+}
+.article-zoom-115 {
+  zoom: 1.15;
+}
+.article-zoom-130 {
+  zoom: 1.3;
+}
