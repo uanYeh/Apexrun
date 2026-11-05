@@ -12,7 +12,9 @@
           :key="item.id"
         >
           <div class="news-card card border-0 rounded-0 position-relative h-100">
-            <img :src="item.image" class="rounded-0 img-fluid mb-0" :alt="item.title" />
+            <div class="news-img">
+              <img :src="item.image" class="rounded-0" :alt="item.title" />
+            </div>
             <div class="card-body px-1 p-md-2 p-lg-3 pt-2 d-flex flex-column">
               <p class="text-muted fs-7 mb-1">
                 <i class="bi bi-calendar-week me-1"></i>{{ date(item.create_at) }}
