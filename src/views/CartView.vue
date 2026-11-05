@@ -29,9 +29,9 @@
         </div>
       </div>
       <div class="cart-pancel">
-        <p class="fs-5 fw-bolder">Cart ({{ totalQty }} items)</p>
+        <p class="fs-5 fw-bolder">Cart ({{ cartStore.totalQty }} items)</p>
         <div class="row g-3">
-          <!-- ✏️ 修改：改用共用的購物車列表 -->
+          <!-- 購物車列表 -->
           <CartItemList class="col-12 col-lg-8" />
 
           <div class="col-12 col-lg-4">
@@ -113,12 +113,12 @@
 <script>
 import TheHeader from "@/components/TheHeader.vue";
 import TheFooter from "@/components/TheFooter.vue";
-import CartItemList from "@/components/CartItemList.vue"; // ✅ 新增
+import CartItemList from "@/components/CartItemList.vue";
 import { useCartStore } from "@/stores/cart";
 import { currency } from "@/methods/filters";
 
 export default {
-  components: { TheHeader, TheFooter, CartItemList }, // ✏️ 修改：加上 CartItemList
+  components: { TheHeader, TheFooter, CartItemList },
   setup() {
     const cartStore = useCartStore();
     cartStore.getCart();
@@ -129,7 +129,6 @@ export default {
       couponCode: "",
       couponMsg: "",
       couponSuccess: false,
-      // 🗑️ 刪除 loadingKey：移到 CartItemList 裡了
     };
   },
   watch: {
@@ -166,15 +165,11 @@ export default {
       localStorage.removeItem("couponCode");
       this.cartStore.finalTotal = this.cartStore.total;
     },
-    // 🗑️ 刪除 variantLabel、updateQty、removeItem：移到 CartItemList 裡了
   },
   computed: {
-    // 購物車總件數
-    totalQty() {
-      return this.cartStore.carts.reduce((sum, item) => sum + item.qty, 0);
-    },
+    // 折扣金額（四捨五入，避免小數點）
     discountAmount() {
-      return this.cartStore.total - this.cartStore.finalTotal;
+      return Math.round(this.cartStore.total - this.cartStore.finalTotal);
     },
     discountPercent() {
       if (!this.cartStore.total) return 0;

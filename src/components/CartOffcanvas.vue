@@ -3,10 +3,10 @@
     <a href="#" class="position-relative mx-3" aria-label="Open cart" @click.prevent="openCart">
       <i class="bi bi-bag fs-4 text-dark"></i>
       <span
-        v-if="totalQty"
+        v-if="cartStore.totalQty"
         class="position-absolute translate-middle badge rounded-pill bg-danger d-flex justify-content-center align-items-center text-white fw-bolder"
       >
-        {{ totalQty }}
+        {{ cartStore.totalQty }}
       </span>
     </a>
   </div>

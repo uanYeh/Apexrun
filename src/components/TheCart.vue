@@ -7,7 +7,7 @@
     ref="cartOffcanvas"
   >
     <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="CartOffcanvasLabel">Cart ({{ totalQty }} items)</h5>
+      <h5 class="offcanvas-title" id="CartOffcanvasLabel">Cart ({{ cartStore.totalQty }} items)</h5>
       <button
         type="button"
         class="btn-close"
@@ -16,6 +16,9 @@
       ></button>
     </div>
     <hr class="my-0" />
+
+    <!-- 選規格（從商品卡片加入有規格的商品時出現） -->
+    <CartQuickAdd />
 
     <!-- Just Added 提示 -->
     <div v-if="cartStore.lastAdded" class="bg-light px-3 py-3 border-bottom">
@@ -43,7 +46,7 @@
         <p class="mt-2">Your cart is empty</p>
       </div>
 
-      <!-- ✏️ 修改：改用共用的購物車列表（小尺寸） -->
+      <!-- 購物車列表（小尺寸） -->
       <CartItemList v-else size="sm" class="flex-grow-1 overflow-y-auto" />
 
       <!-- 總計 + 按鈕 -->
@@ -72,21 +75,24 @@
 </template>
 
 <script>
-import CartItemList from "@/components/CartItemList.vue"; // ✅ 新增
+import CartItemList from "@/components/CartItemList.vue";
+import CartQuickAdd from "@/components/CartQuickAdd.vue";
 import { useCartStore } from "@/stores/cart";
 import { currency } from "@/methods/filters";
+import { Offcanvas } from "bootstrap";
 
 export default {
-  components: { CartItemList }, // ✅ 新增
+  components: { CartItemList, CartQuickAdd },
   setup() {
     const cartStore = useCartStore();
     cartStore.getCart();
     return { cartStore };
   },
-  computed: {
-    // 購物車總件數
-    totalQty() {
-      return this.cartStore.carts.reduce((sum, item) => sum + item.qty, 0);
+  watch: {
+    // 換頁時（例如點商品回到詳細頁），關掉購物車面板
+    $route() {
+      const offcanvas = Offcanvas.getInstance(this.$refs.cartOffcanvas);
+      if (offcanvas) offcanvas.hide();
     },
   },
   methods: {
@@ -95,11 +101,12 @@ export default {
     variantLabel(v) {
       return [v.color, v.size].filter(Boolean).join(" / ");
     },
-    // 🗑️ 刪除 updateQty、removeItem：移到 CartItemList 裡了
   },
   mounted() {
+    // 關掉購物車面板時，清掉 Just added 和選規格區
     this.$refs.cartOffcanvas.addEventListener("hidden.bs.offcanvas", () => {
       this.cartStore.lastAdded = null;
+      this.cartStore.closeQuickAdd();
     });
   },
 };

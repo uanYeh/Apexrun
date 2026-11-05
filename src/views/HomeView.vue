@@ -1,4 +1,5 @@
 <template>
+  <Loading :active="isLoading"></Loading>
   <TheCouponModal />
   <TheHeader />
   <div data-aos="fade-down" data-aos-delay="200">
@@ -321,39 +322,6 @@
       </p>
     </div>
   </footer> -->
-  <!-- 購物車側邊欄 -->
-  <div
-    class="offcanvas offcanvas-end"
-    tabindex="-1"
-    id="offcanvasExample"
-    aria-labelledby="offcanvasExampleLabel"
-  >
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title border-1" id="offcanvasExampleLabel">Cart (1 items)</h5>
-      <button
-        type="button"
-        class="btn-close"
-        data-bs-dismiss="offcanvas"
-        aria-label="Close"
-      ></button>
-    </div>
-    <div class="offcanvas-body">
-      <div>
-        Some text as placeholder. In real life you can have the elements you have chosen. Like,
-        text, images, lists, etc.
-      </div>
-      <div class="dropdown mt-3">
-        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-          Dropdown button
-        </button>
-        <ul class="dropdown-menu">
-          <li><a class="dropdown-item" href="#">Action</a></li>
-          <li><a class="dropdown-item" href="#">Another action</a></li>
-          <li><a class="dropdown-item" href="#">Something else here</a></li>
-        </ul>
-      </div>
-    </div>
-  </div>
 
   <TheFooter />
 </template>
@@ -405,6 +373,7 @@ export default {
   },
   data() {
     return {
+      isLoading: false,
       bannerImg,
       fbannerImg,
       areaImg,
@@ -436,12 +405,21 @@ export default {
     },
     getProduct() {
       const api = `${import.meta.env.VITE_APP_API}api/${import.meta.env.VITE_APP_PATH}/products/all`;
-      this.$http.get(api).then((res) => {
-        this.allProducts = res.data.products;
-        this.saleProducts = this.allProducts.filter((p) => p.origin_price > p.price);
-        this.newProducts = [...this.allProducts].reverse().slice(0, 6);
-        this.popularProducts = [...this.allProducts].sort(() => Math.random() - 0.5).slice(0, 6);
-      });
+      this.isLoading = true;
+      this.$http
+        .get(api)
+        .then((res) => {
+          this.allProducts = res.data.products;
+          this.saleProducts = this.allProducts.filter((p) => p.origin_price > p.price);
+          this.newProducts = [...this.allProducts].reverse().slice(0, 6);
+          this.popularProducts = [...this.allProducts].sort(() => Math.random() - 0.5).slice(0, 6);
+        })
+        .catch((err) => {
+          console.error("取得商品失敗：", err);
+        })
+        .finally(() => {
+          this.isLoading = false;
+        });
     },
     addCart(id) {
       this.cartStore.addCart(id, 1).then(() => {

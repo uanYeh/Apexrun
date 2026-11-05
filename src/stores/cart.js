@@ -26,7 +26,12 @@ export const useCartStore = defineStore("cart", {
     finalTotal: 0,
     lastAdded: null,
     loadingItem: "",
+    quickAddProduct: null, // 正在 TheCart 裡選規格的商品
   }),
+  getters: {
+    // 購物車總數量（每個規格的數量加起來），各頁共用
+    totalQty: (state) => state.carts.reduce((sum, item) => sum + sumQty(getVariants(item)), 0),
+  },
   actions: {
     getCart() {
       const api = `${apiBase()}/cart`;
@@ -44,6 +49,17 @@ export const useCartStore = defineStore("cart", {
       return getVariants(item);
     },
 
+    // 打開 TheCart 的選規格區
+    openQuickAdd(product) {
+      this.lastAdded = null;
+      this.quickAddProduct = product;
+    },
+
+    // 關掉選規格區
+    closeQuickAdd() {
+      this.quickAddProduct = null;
+    },
+
     // 存回 API：qty 自動算成明細的總數
     async saveCartItem(item, variants) {
       const api = `${apiBase()}/cart/${item.id}`;
@@ -53,7 +69,7 @@ export const useCartStore = defineStore("cart", {
       await this.getCart();
     },
 
-    // ✏️ 修改：多了 options，可以傳入 { size, color }
+    // 加入購物車，options 可以傳入 { size, color }
     async addCart(id, qty = 1, options = {}) {
       if (this.loadingItem) return;
       this.loadingItem = id;
@@ -104,7 +120,7 @@ export const useCartStore = defineStore("cart", {
       }
     },
 
-    // ✅ 新增：調整某個規格的數量
+    // 調整某個規格的數量
     async updateVariantQty(item, index, qty) {
       if (qty < 1) return;
       const variants = getVariants(item);
@@ -112,7 +128,7 @@ export const useCartStore = defineStore("cart", {
       await this.saveCartItem(item, variants);
     },
 
-    // ✅ 新增：刪除某個規格，刪到沒有規格時，整個商品從購物車移除
+    // 刪除某個規格，刪到沒有規格時，整個商品從購物車移除
     async removeVariant(item, index) {
       const variants = getVariants(item);
       variants.splice(index, 1);

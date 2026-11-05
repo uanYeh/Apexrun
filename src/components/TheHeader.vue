@@ -33,11 +33,13 @@
                 Product
               </a>
               <ul class="dropdown-menu rounded-0 mb-3 mb-lg-0">
-                <li><RouterLink class="dropdown-item" to="/products">All Products</RouterLink></li>
-                <li v-for="cat in categories" :key="cat">
-                  <RouterLink class="dropdown-item" :to="`/products?category=${cat}`">
-                    {{ cat }}
-                  </RouterLink>
+                <li>
+                  <RouterLink class="dropdown-item" to="/products">All Products</RouterLink>
+                </li>
+                <li v-for="cat in navCategories" :key="cat">
+                  <RouterLink class="dropdown-item" :to="`/products?category=${cat}`">{{
+                    cat
+                  }}</RouterLink>
                 </li>
               </ul>
             </li>
@@ -126,7 +128,7 @@ export default {
   },
   data() {
     return {
-      categories: [],
+      navCategories: [],
       keyword: "", // 搜尋關鍵字
     };
   },
@@ -162,7 +164,7 @@ export default {
     getCategories() {
       const api = `${import.meta.env.VITE_APP_API}api/${import.meta.env.VITE_APP_PATH}/products/all`;
       this.$http.get(api).then((res) => {
-        this.categories = [...new Set(res.data.products.map((p) => p.category))];
+        this.navCategories = [...new Set(res.data.products.map((p) => p.category))].sort();
       });
     },
     // 搜尋：按 Enter 後跳到商品頁

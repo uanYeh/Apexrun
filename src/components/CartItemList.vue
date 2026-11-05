@@ -1,18 +1,31 @@
 <template>
-  <ul class="list-unstyled">
+  <ul class="list-group list-group-flush">
     <template v-for="item in cartStore.carts" :key="item.id">
       <li
         v-for="(variant, index) in cartStore.variantsOf(item)"
         :key="`${item.id}-${index}`"
-        class="cart-item d-flex align-items-center border-bottom"
-        :class="editable ? 'py-3' : 'py-2'"
+        class="cart-item list-group-item list-group-item-action d-flex align-items-center px-2"
+        :class="[editable ? 'py-3' : 'py-2', { 'opacity-50 pe-none': isDeleting(item, index) }]"
       >
-        <!-- 圖片 -->
-        <img :src="item.product.imageUrl" :alt="item.product.title" class="cart-item-img me-3" />
+        <!-- 圖片（購物車可以點回商品頁，結帳頁不行） -->
+        <component
+          :is="editable ? 'RouterLink' : 'div'"
+          v-bind="editable ? { to: productLink(item) } : {}"
+          class="me-3 flex-shrink-0"
+        >
+          <img :src="item.product.imageUrl" :alt="item.product.title" class="cart-item-img" />
+        </component>
 
         <!-- 商品資訊 -->
         <div class="flex-grow-1">
-          <p class="fw-bold mb-1 cart-item-title me-2">{{ item.product.title }}</p>
+          <RouterLink
+            v-if="editable"
+            :to="productLink(item)"
+            class="d-block fw-bold mb-1 cart-item-title me-2 link-dark link-opacity-75-hover text-decoration-none"
+          >
+            {{ item.product.title }}
+          </RouterLink>
+          <p v-else class="fw-bold mb-1 cart-item-title me-2">{{ item.product.title }}</p>
 
           <!-- 規格（顏色 / 尺寸） -->
           <p v-if="variantLabel(variant)" class="mb-1 fs-7 text-muted">
@@ -26,7 +39,7 @@
           <div v-else class="d-flex align-items-center">
             <div v-if="size === 'sm'">qty：</div>
             <div
-              class="d-flex border"
+              class="d-flex border border-dark-subtle"
               :style="[
                 size === 'sm' ? 'height: 28px' : '',
                 isLoading(item, index) ? 'pointer-events: none; opacity: 0.5' : '',
@@ -64,14 +77,25 @@
         <!-- 價格 + 刪除 -->
         <div class="d-flex align-items-center ms-3" :class="size === 'sm' ? 'gap-2' : 'gap-3'">
           <span class="fw-bold">${{ currency(item.product.price * variant.qty) }}</span>
-          <button
-            v-if="editable"
-            class="btn-close"
-            :class="{ 'me-2': size === 'sm' }"
-            :disabled="isLoading(item, index)"
-            :aria-label="`Remove ${item.product.title}`"
-            @click="removeItem(item, index)"
-          ></button>
+          <template v-if="editable">
+            <!-- 刪除中：顯示轉圈 -->
+            <span
+              v-if="isDeleting(item, index)"
+              class="spinner-border spinner-border-sm text-primary"
+              :class="{ 'me-2': size === 'sm' }"
+              role="status"
+            >
+              <span class="visually-hidden">Removing...</span>
+            </span>
+            <button
+              v-else
+              class="btn-close"
+              :class="{ 'me-2': size === 'sm' }"
+              :disabled="isLoading(item, index)"
+              :aria-label="`Remove ${item.product.title}`"
+              @click="removeItem(item, index)"
+            ></button>
+          </template>
         </div>
       </li>
     </template>
@@ -101,17 +125,25 @@ export default {
   },
   data() {
     return {
-      loadingKey: null, // 正在更新/刪除的那一行（商品 id + 規格位置）
+      loadingKey: null, // 正在更新數量的那一行（商品 id + 規格位置）
+      deletingKey: null, // 正在刪除的那一行
     };
   },
   methods: {
     currency,
+    // 商品詳細頁的網址
+    productLink(item) {
+      return `/products/${item.product_id}`;
+    },
     // 規格文字，例如「Black / M」
     variantLabel(v) {
       return [v.color, v.size].filter(Boolean).join(" / ");
     },
     isLoading(item, index) {
       return this.loadingKey === `${item.id}-${index}`;
+    },
+    isDeleting(item, index) {
+      return this.deletingKey === `${item.id}-${index}`;
     },
     // 調整某一個規格的數量
     async updateQty(item, index, qty) {
@@ -126,11 +158,11 @@ export default {
     },
     // 刪除某一個規格
     async removeItem(item, index) {
-      this.loadingKey = `${item.id}-${index}`;
+      this.deletingKey = `${item.id}-${index}`;
       try {
         await this.cartStore.removeVariant(item, index);
       } finally {
-        this.loadingKey = null;
+        this.deletingKey = null;
       }
     },
   },

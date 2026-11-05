@@ -46,7 +46,7 @@
                 type="button"
                 @click="isOpen = !isOpen"
               >
-                <span>Cart ({{ totalQty }} items)</span>
+                <span>Cart ({{ cartStore.totalQty }} items)</span>
                 <i class="bi bi-chevron-down" :class="{ 'rotate-180': isOpen }"></i>
               </button>
               <div v-show="isOpen">
@@ -370,10 +370,6 @@ export default {
     },
   },
   computed: {
-    // 購物車總件數
-    totalQty() {
-      return this.cartStore.carts.reduce((sum, item) => sum + item.qty, 0);
-    },
     discountAmount() {
       return Math.round(this.cartStore.total - this.cartStore.finalTotal);
     },

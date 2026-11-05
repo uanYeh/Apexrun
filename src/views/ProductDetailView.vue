@@ -103,8 +103,21 @@
           <h3 class="fw-bold mb-2">{{ product.title }}</h3>
           <div class="fs-6 mb-2">{{ product.description }}</div>
 
-          <!-- 評分 //隨機給，因為沒有api-->
-          <p class="mb-2"><i class="bi bi-star-fill text-warning"></i> {{ rating }}</p>
+          <!-- 收藏 + 評分 //評分隨機給，因為沒有api-->
+          <div class="d-flex align-items-center gap-3 mb-2">
+            <button
+              type="button"
+              class="btn p-0 border-0 lh-1 fs-5"
+              :aria-label="isFavorite ? 'Remove from favorites' : 'Add to favorites'"
+              @click="favoriteStore.toggleFavorite(product.id)"
+            >
+              <i
+                class="bi heart-icon"
+                :class="isFavorite ? 'bi-heart-fill is-active' : 'bi-heart'"
+              ></i>
+            </button>
+            <span><i class="bi bi-star-fill text-warning"></i> {{ rating }}</span>
+          </div>
 
           <!-- 價格：✏️ 修改，有折扣才顯示原價 -->
           <div class="mb-2 mb-lg-4">
@@ -205,11 +218,15 @@
       <div v-else class="row mb-4 placeholder-wave" aria-hidden="true">
         <div class="col-12 col-md-6 col-lg-8">
           <!-- 手機、平板：一張 -->
-          <div class="placeholder w-100 product-img d-lg-none"></div>
+          <div class="ratio ratio-1x1 d-lg-none">
+            <div class="placeholder w-100 h-100"></div>
+          </div>
           <!-- 桌機：2 × 2 -->
           <div class="row g-2 d-none d-lg-flex">
             <div v-for="n in 4" :key="n" class="col-6">
-              <div class="placeholder w-100 product-img"></div>
+              <div class="ratio ratio-1x1">
+                <div class="placeholder w-100 h-100"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -334,6 +351,7 @@ import "photoswipe/style.css";
 
 // ===== 購物車 =====
 import { useCartStore } from "@/stores/cart";
+import { useFavoriteStore } from "@/stores/favorite";
 import { Offcanvas } from "bootstrap";
 
 // ===== 元件 =====
@@ -349,7 +367,8 @@ import { productOptions, galleryOptions } from "@/config/swiperOptions"; // ✏�
 export default {
   setup() {
     const cartStore = useCartStore();
-    return { cartStore };
+    const favoriteStore = useFavoriteStore();
+    return { cartStore, favoriteStore };
   },
   components: {
     TheHeader,
@@ -504,6 +523,9 @@ export default {
     },
   },
   computed: {
+    isFavorite() {
+      return this.favoriteStore.favorites.includes(this.product.id);
+    },
     rating() {
       const seed = this.product.id ? this.product.id.charCodeAt(0) : 0;
       return (4.5 + (seed % 9) * 0.1).toFixed(1);

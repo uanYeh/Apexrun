@@ -110,11 +110,19 @@ export default {
     getProducts() {
       const api = `${import.meta.env.VITE_APP_API}api/${import.meta.env.VITE_APP_PATH}/products/all`;
       this.isLoading = true;
-      this.$http.get(api).then((res) => {
-        this.isLoading = false;
-        this.allProducts = res.data.products;
-        this.filterProducts();
-      });
+      this.$http
+        .get(api)
+        .then((res) => {
+          // 最新上架的排在最前面
+          this.allProducts = [...res.data.products].reverse();
+          this.filterProducts();
+        })
+        .catch((err) => {
+          console.error("取得商品失敗：", err);
+        })
+        .finally(() => {
+          this.isLoading = false;
+        });
     },
     // 依分類 + 搜尋關鍵字篩選
     filterProducts() {
@@ -157,7 +165,7 @@ export default {
   },
   computed: {
     categories() {
-      return [...new Set(this.allProducts.map((p) => p.category))];
+      return [...new Set(this.allProducts.map((p) => p.category))].sort();
     },
     sortedProducts() {
       const list = [...this.products];

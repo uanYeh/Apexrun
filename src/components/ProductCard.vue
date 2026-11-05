@@ -42,7 +42,7 @@
         aria-controls="CartOffcanvas"
         :style="{ cursor: loadingItem === product.id ? 'wait' : 'pointer' }"
         :aria-disabled="loadingItem === product.id"
-        @click.prevent="addCart(product.id)"
+        @click.prevent="addCart"
       >
         <span
           v-if="loadingItem === product.id"
@@ -62,6 +62,7 @@
 
 <script>
 import { mapState } from "pinia";
+import { Offcanvas } from "bootstrap";
 import { useCartStore } from "@/stores/cart";
 import { useFavoriteStore } from "@/stores/favorite";
 
@@ -72,12 +73,26 @@ export default {
   computed: {
     ...mapState(useCartStore, ["loadingItem"]),
     ...mapState(useFavoriteStore, ["favorites"]),
+    // 這個商品有沒有顏色或尺寸要選
+    hasOptions() {
+      const { colors, sizes } = this.product;
+      return (
+        (Array.isArray(colors) && colors.length > 0) || (Array.isArray(sizes) && sizes.length > 0)
+      );
+    },
   },
 
   methods: {
-    addCart(id) {
+    addCart() {
       if (this.loadingItem) return;
-      this.$emit("add-cart", id);
+      // 有規格：打開購物車面板選規格
+      if (this.hasOptions) {
+        useCartStore().openQuickAdd(this.product);
+        Offcanvas.getOrCreateInstance(document.getElementById("CartOffcanvas")).show();
+        return;
+      }
+      // 沒有規格：直接加入購物車
+      this.$emit("add-cart", this.product.id);
     },
     isFavorite(id) {
       return this.favorites.includes(id);
