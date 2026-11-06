@@ -10,7 +10,7 @@
           <img src="@/assets/images/logo-dark.svg" alt="Wavo" style="width: 190px" />
         </RouterLink>
 
-        <!-- 漢堡：純 Vue 控制，不用 data-bs-toggle -->
+        <!-- 漢堡：純 Vue 控制 -->
         <button
           class="navbar-toggler rounded-0"
           type="button"
@@ -20,10 +20,14 @@
           <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- navbar-collapse：用 v-show 取代 Bootstrap collapse -->
-        <div v-show="navOpen" class="navbar-collapse" id="navbarSupportedContent">
+        <!-- navbar-collapse -->
+        <div
+          class="navbar-collapse"
+          :class="{ 'd-none d-lg-flex': !navOpen, 'd-flex': navOpen }"
+          id="navbarSupportedContent"
+        >
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
+            <li class="nav-item position-relative">
               <a
                 class="link-hover nav-link fw-semibold fs-6 d-flex justify-content-between align-items-center"
                 href="#"
@@ -38,18 +42,19 @@
                   }"
                 ></i>
               </a>
-              <div v-show="productOpen">
-                <ul class="list-unstyled ps-3">
-                  <li>
-                    <RouterLink class="dropdown-item" to="/products">All Products</RouterLink>
-                  </li>
-                  <li v-for="cat in navCategories" :key="cat">
-                    <RouterLink class="dropdown-item" :to="`/products?category=${cat}`">{{
-                      cat
-                    }}</RouterLink>
-                  </li>
-                </ul>
-              </div>
+              <ul
+                v-show="productOpen"
+                class="dropdown-menu rounded-0 mb-3 mb-lg-0 show w-100 w-lg-auto"
+              >
+                <li>
+                  <RouterLink class="dropdown-item" to="/products">All Products</RouterLink>
+                </li>
+                <li v-for="cat in navCategories" :key="cat">
+                  <RouterLink class="dropdown-item" :to="`/products?category=${cat}`">{{
+                    cat
+                  }}</RouterLink>
+                </li>
+              </ul>
             </li>
             <li class="nav-item">
               <RouterLink
@@ -195,6 +200,7 @@ export default {
     },
     $route() {
       this.productOpen = false;
+      this.navOpen = false;
     },
   },
   created() {

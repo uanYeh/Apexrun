@@ -681,3 +681,14 @@ $area-img-width-xl: percentage(1 / 5); // = 25%
   text-overflow: ellipsis;
   max-width: 40vw;
 }
+
+@include media-breakpoint-down(lg) {
+  .navbar-nav {
+    width: 100%;
+  }
+}
+@include media-breakpoint-up(lg) {
+  .bi-chevron-down {
+    display: none;
+  }
+}
