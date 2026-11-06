@@ -9,39 +9,47 @@
         <RouterLink class="navbar-brand" to="/">
           <img src="@/assets/images/logo-dark.svg" alt="Wavo" style="width: 190px" />
         </RouterLink>
+
+        <!-- 漢堡：純 Vue 控制，不用 data-bs-toggle -->
         <button
           class="navbar-toggler rounded-0"
           type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
-          aria-expanded="false"
           aria-label="Toggle navigation"
+          @click="navOpen = !navOpen"
         >
           <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+        <!-- navbar-collapse：用 v-show 取代 Bootstrap collapse -->
+        <div v-show="navOpen" class="navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item dropdown">
+            <li class="nav-item">
               <a
-                class="link-hover nav-link dropdown-toggle fw-semibold fs-6"
+                class="link-hover nav-link fw-semibold fs-6 d-flex justify-content-between align-items-center"
                 href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
+                @click.prevent="toggleProduct"
               >
                 Product
+                <i
+                  class="bi bi-chevron-down ms-1"
+                  :style="{
+                    transform: productOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s',
+                  }"
+                ></i>
               </a>
-              <ul class="dropdown-menu rounded-0 mb-3 mb-lg-0">
-                <li>
-                  <RouterLink class="dropdown-item" to="/products">All Products</RouterLink>
-                </li>
-                <li v-for="cat in navCategories" :key="cat">
-                  <RouterLink class="dropdown-item" :to="`/products?category=${cat}`">{{
-                    cat
-                  }}</RouterLink>
-                </li>
-              </ul>
+              <div v-show="productOpen">
+                <ul class="list-unstyled ps-3">
+                  <li>
+                    <RouterLink class="dropdown-item" to="/products">All Products</RouterLink>
+                  </li>
+                  <li v-for="cat in navCategories" :key="cat">
+                    <RouterLink class="dropdown-item" :to="`/products?category=${cat}`">{{
+                      cat
+                    }}</RouterLink>
+                  </li>
+                </ul>
+              </div>
             </li>
             <li class="nav-item">
               <RouterLink
@@ -57,7 +65,7 @@
               >
             </li>
             <li class="nav-item d-lg-none">
-              <RouterLink class="link-hover nav-link fw-semibold fs-6" to="/faq">FAQ </RouterLink>
+              <RouterLink class="link-hover nav-link fw-semibold fs-6" to="/faq">FAQ</RouterLink>
             </li>
             <li class="nav-item d-lg-none">
               <RouterLink class="link-hover nav-link fw-semibold fs-6" to="/delivery"
@@ -69,7 +77,6 @@
                 >Return</RouterLink
               >
             </li>
-            <!-- 手機選單：My favorite -->
             <li class="nav-item d-lg-none">
               <RouterLink class="link-hover nav-link fw-semibold fs-6" to="/favorite"
                 >My favorite</RouterLink
@@ -94,7 +101,7 @@
           </form>
         </div>
 
-        <!-- 桌機版：愛心連到收藏頁（有收藏時變實心） -->
+        <!-- 桌機版愛心 -->
         <RouterLink
           to="/favorite"
           class="favorite ms-3 d-none d-lg-block"
@@ -121,7 +128,6 @@ import { useFavoriteStore } from "@/stores/favorite";
 
 export default {
   components: { CartOffcanvas, TheCountdown },
-  // 收藏 store：判斷 Header 愛心要不要實心
   setup() {
     const favoriteStore = useFavoriteStore();
     return { favoriteStore };
@@ -129,7 +135,8 @@ export default {
   data() {
     return {
       navCategories: [],
-      keyword: "", // 搜尋關鍵字
+      keyword: "",
+      navOpen: false,
     };
   },
   mounted() {
@@ -167,7 +174,6 @@ export default {
         this.navCategories = [...new Set(res.data.products.map((p) => p.category))].sort();
       });
     },
-    // 搜尋：按 Enter 後跳到商品頁
     search() {
       if (!this.keyword) {
         this.$router.push("/products");
@@ -175,13 +181,19 @@ export default {
       }
       this.$router.push({ path: "/products", query: { search: this.keyword } });
     },
+    toggleProduct() {
+      this.productOpen = !this.productOpen;
+    },
   },
   watch: {
     "$route.query.search": {
       handler(val) {
         this.keyword = val || "";
       },
-      immediate: true, // 一進頁面就先同步一次
+      immediate: true,
+    },
+    $route() {
+      this.productOpen = false;
     },
   },
   created() {
