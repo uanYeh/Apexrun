@@ -137,6 +137,7 @@ export default {
       navCategories: [],
       keyword: "",
       navOpen: false,
+      productOpen: false,
     };
   },
   mounted() {
