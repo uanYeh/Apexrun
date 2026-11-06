@@ -54,7 +54,7 @@
           >PhotoSwipe</a
         >、AI、
         <a
-          href="https://uanyeh.github.io/apexrun-admin/#/login"
+          href="https://uanyeh.github.io/apexrun-admin/#/login?demo=1"
           target="_blank"
           class="text-decoration-none fw-semibold"
           style="color: #ffd700"
