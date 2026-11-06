@@ -2,24 +2,30 @@
   <TheHeader />
   <main class="container-xl py-3 my-6">
     <div class="row justify-content-center">
-      <div class="stepper col-8 mb-4 px-0 d-flex flex-direction justify-content-between">
-        <div class="d-flex align-items-center ps-0 bg-white pe-2">
+      <div
+        class="stepper col-12 col-md-8 mb-4 px-0 d-flex justify-content-center justify-content-md-between"
+      >
+        <div class="d-flex align-items-center bg-white pe-2">
           <div
             class="cart-number bg-secondary bg-opacity-25 text-white my-0 rounded-circle d-flex align-items-center justify-content-center fs-5 fw-light me-2"
           >
             1
           </div>
-          <p class="mb-0 fs-5 fw-semibold text-secondary text-opacity-25">Order Detail</p>
+          <p class="mb-0 fs-5 fw-semibold text-secondary text-opacity-25 d-none d-md-block">
+            Order Detail
+          </p>
         </div>
-        <div class="d-flex align-items-center ps-0 bg-white pe-2">
+        <div class="d-flex align-items-center bg-white pe-2">
           <div
             class="cart-number bg-secondary bg-opacity-25 text-white my-0 rounded-circle d-flex align-items-center justify-content-center fs-5 fw-light me-2"
           >
             2
           </div>
-          <p class="mb-0 fs-5 fw-semibold text-secondary text-opacity-25">Shipping & Payment</p>
+          <p class="mb-0 fs-5 fw-semibold text-secondary text-opacity-25 d-none d-md-block">
+            Shipping & Payment
+          </p>
         </div>
-        <div class="d-flex align-items-center ps-0 bg-white">
+        <div class="d-flex align-items-center bg-white">
           <div
             class="cart-number bg-primary text-white my-0 rounded-circle d-flex align-items-center justify-content-center fs-5 fw-light me-2"
           >
@@ -28,7 +34,7 @@
           <p class="mb-0 fs-5 text-primary fw-semibold">Order Confirm</p>
         </div>
       </div>
-      <div class="order-pancel col-8">
+      <div class="order-pancel col-12 col-md-8">
         <div class="text-center mb-4">
           <div class="success-checkmark mb-3">
             <svg viewBox="0 0 52 52" class="checkmark-svg">

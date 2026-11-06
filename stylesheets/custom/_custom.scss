@@ -434,6 +434,11 @@ $area-img-width-xl: percentage(1 / 5); // = 25%
   width: 100%;
   z-index: -1;
 }
+@include media-breakpoint-down(md) {
+  .stepper:after {
+    display: none;
+  }
+}
 
 .cart-number {
   width: 50px;

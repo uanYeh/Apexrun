@@ -2,16 +2,20 @@
   <TheHeader />
   <main class="container-xl py-3 my-6">
     <div class="row justify-content-center">
-      <div class="stepper col-8 mb-4 px-0 d-flex flex-direction justify-content-between">
-        <div class="d-flex align-items-center ps-0 bg-white pe-2">
+      <div
+        class="stepper col-12 col-md-8 mb-4 px-0 d-flex justify-content-center justify-content-md-between"
+      >
+        <div class="d-flex align-items-center bg-white pe-2">
           <div
             class="cart-number bg-secondary bg-opacity-25 text-white my-0 rounded-circle d-flex align-items-center justify-content-center fs-5 fw-light me-2"
           >
             1
           </div>
-          <p class="mb-0 fs-5 fw-semibold text-secondary text-opacity-25">Order Detail</p>
+          <p class="mb-0 fs-5 fw-semibold text-secondary text-opacity-25 d-none d-md-block">
+            Order Detail
+          </p>
         </div>
-        <div class="d-flex align-items-center ps-0 bg-white pe-2">
+        <div class="d-flex align-items-center bg-white pe-2">
           <div
             class="cart-number bg-primary text-white my-0 rounded-circle d-flex align-items-center justify-content-center fs-5 fw-light me-2"
           >
@@ -19,7 +23,7 @@
           </div>
           <p class="mb-0 fs-5 text-primary fw-semibold">Shipping & Payment</p>
         </div>
-        <div class="d-flex align-items-center ps-0 bg-white">
+        <div class="d-none d-md-flex align-items-center bg-white">
           <div
             class="cart-number bg-secondary bg-opacity-25 text-white my-0 rounded-circle d-flex align-items-center justify-content-center fs-5 fw-light me-2"
           >
@@ -29,17 +33,18 @@
         </div>
       </div>
       <div class="cart-pancel">
-        <a
-          @click.prevent="$router.back()"
-          href="#"
-          class="text-decoration-none text-muted mb-3 d-inline-block link-dark"
-        >
-          <i class="bi bi-arrow-left me-1"></i>Back to Cart
-        </a>
-        <h4 class="fw-bold mb-3">Product Details</h4>
-
-        <div class="row g-3 flex-">
-          <div class="col-12 col-lg-8">
+        <div class="row g-3">
+          <a
+            @click.prevent="$router.back()"
+            href="#"
+            class="text-decoration-none text-muted mb-1 d-inline-block link-dark"
+          >
+            <i class="bi bi-arrow-left me-1"></i>Back to Cart
+          </a>
+          <div class="col-12 order-2 order-lg-1">
+            <h4 class="fw-bold mb-1">Product Details</h4>
+          </div>
+          <div class="col-12 col-lg-8 order-3 order-lg-2">
             <div class="mb-5">
               <button
                 class="btn btn-light w-100 text-start rounded-0 d-flex justify-content-between align-items-center py-3 px-3"
@@ -227,7 +232,7 @@
               </Form>
             </div>
           </div>
-          <div class="col-12 col-lg-4">
+          <div class="col-12 col-lg-4 order-1 order-lg-3">
             <div class="p-4 bg-light rounded-0">
               <h5 class="fw-bold mb-3">Order Summary</h5>
               <hr />
