@@ -46,7 +46,7 @@
       >
         <span
           v-if="loadingItem === product.id"
-          class="spinner-border text-light"
+          class="spinner-border text-light flex-shrink-0"
           style="width: 1.5rem; height: 1.5rem; border-width: 0.2em"
           role="status"
         >

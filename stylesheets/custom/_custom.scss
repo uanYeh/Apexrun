@@ -697,3 +697,10 @@ $area-img-width-xl: percentage(1 / 5); // = 25%
     display: none;
   }
 }
+
+@include media-breakpoint-down(md) {
+  .icon-cart {
+    min-height: 40px;
+    align-items: center;
+  }
+}
