@@ -254,11 +254,7 @@
 
       <div>
         <!-- 頁籤 -->
-        <ul
-          class="nav nav-tabs d-flex flex-wrap justify-content-start justify-content-md-center align-items-stretch"
-          id="productTab"
-          role="tablist"
-        >
+        <ul class="nav nav-tabs" id="productTab" role="tablist">
           <li class="nav-item" role="presentation">
             <button
               class="nav-link active fw-bold fs-6 rounded-0 border me-1 me-md-2 border-bottom-0 px-2 px-md-5 py-2"
