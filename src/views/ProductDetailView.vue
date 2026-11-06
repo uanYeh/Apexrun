@@ -10,7 +10,7 @@
         <div class="col-12 col-md-6 col-lg-8">
           <!-- 手機、平板：左右滑動 -->
           <div class="d-lg-none">
-            <Swiper v-bind="galleryOptions" class="product-gallery-swiper">
+            <Swiper v-bind="galleryOptions" class="product-gallery-swiper mb-3">
               <SwiperSlide v-for="(url, index) in photos" :key="url">
                 <img
                   :src="url"

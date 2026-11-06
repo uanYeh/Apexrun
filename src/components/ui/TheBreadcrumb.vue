@@ -1,27 +1,12 @@
-<!-- <template>
-  <ul class="list-unstyled d-flex fs-6">
-    <li class="px-2">
-      <RouterLink class="link-dark text-decoration-none fw-semibold" to="/">Home</RouterLink>
-    </li>
-    /
-    <li class="px-2">
-      <RouterLink class="link-dark text-decoration-none fw-semibold" to="/products"
-        >Products</RouterLink
-      >
-    </li>
-    /
-    <li class="px-2 active" aria-current="page">Shoes</li>
-  </ul>
-</template> -->
 <!-- TheBreadcrumb.vue -->
 <template>
-  <ul class="list-unstyled d-flex fs-6">
-    <li class="px-2">
+  <ul class="list-unstyled d-flex fs-6 overflow-hidden flex-nowrap">
+    <li class="px-2 flex-shrink-0">
       <RouterLink class="link-dark text-decoration-none fw-semibold" to="/">Home</RouterLink>
     </li>
     <template v-for="(crumb, index) in crumbs" :key="index">
-      /
-      <li class="px-2">
+      <span class="flex-shrink-0">/</span>
+      <li class="px-2 breadcrumb-item-last">
         <RouterLink
           v-if="crumb.to"
           class="link-dark text-decoration-none fw-semibold"
